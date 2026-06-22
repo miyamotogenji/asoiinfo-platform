@@ -11,7 +11,7 @@ class PlanController extends Controller
     public function index(Request $request)
     {
         $plans = Plan::withCount('contractedServices')
-            ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
+            ->when($request->search, fn($q, $s) => $q->where('name', 'ilike', "%{$s}%"))
             ->when($request->type,   fn($q, $t) => $q->where('type', $t))
             ->when($request->status, fn($q, $s) => $q->where('status', $s))
             ->orderBy('name')->paginate(20);

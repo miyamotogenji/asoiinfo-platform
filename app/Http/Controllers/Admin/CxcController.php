@@ -17,8 +17,8 @@ class CxcController extends Controller
             ->when($request->group_id, fn($q, $id) => $q->where('business_group_id', $id))
             ->when($request->branch_id,fn($q, $id) => $q->where('branch_id', $id))
             ->when($request->search,   fn($q, $s)  =>
-                $q->whereHas('branch', fn($b) => $b->where('name', 'like', "%{$s}%"))
-                  ->orWhereHas('invoice', fn($i) => $i->where('number', 'like', "%{$s}%")))
+                $q->whereHas('branch', fn($b) => $b->where('name', 'ilike', "%{$s}%"))
+                  ->orWhereHas('invoice', fn($i) => $i->where('number', 'ilike', "%{$s}%")))
             ->orderByDesc('days_overdue')
             ->paginate(25);
 

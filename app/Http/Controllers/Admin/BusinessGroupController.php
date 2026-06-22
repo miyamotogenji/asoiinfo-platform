@@ -12,7 +12,7 @@ class BusinessGroupController extends Controller
     {
         $groups = BusinessGroup::withCount(['legalEntities', 'branches', 'contacts'])
             ->when($request->search, fn($q, $s) =>
-                $q->where('name', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%"))
+                $q->where('name', 'ilike', "%{$s}%")->orWhere('code', 'ilike', "%{$s}%"))
             ->when($request->status, fn($q, $s) => $q->where('status', $s))
             ->latest()->paginate(20);
 

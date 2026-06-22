@@ -15,9 +15,9 @@ class ContactController extends Controller
     {
         $contacts = Contact::with(['businessGroup', 'branch'])
             ->when($request->search, fn($q, $s) =>
-                $q->where('name', 'like', "%{$s}%")
-                  ->orWhere('whatsapp', 'like', "%{$s}%")
-                  ->orWhere('phone', 'like', "%{$s}%"))
+                $q->where('name', 'ilike', "%{$s}%")
+                  ->orWhere('whatsapp', 'ilike', "%{$s}%")
+                  ->orWhere('phone', 'ilike', "%{$s}%"))
             ->when($request->type,      fn($q, $t)  => $q->where('type', $t))
             ->when($request->group_id,  fn($q, $id) => $q->where('business_group_id', $id))
             ->latest()->paginate(25);

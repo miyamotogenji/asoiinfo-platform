@@ -13,7 +13,7 @@ class LegalEntityController extends Controller
     {
         $entities = LegalEntity::with('businessGroup')
             ->when($request->search, fn($q, $s) =>
-                $q->where('legal_name', 'like', "%{$s}%")->orWhere('ruc', 'like', "%{$s}%"))
+                $q->where('legal_name', 'ilike', "%{$s}%")->orWhere('ruc', 'ilike', "%{$s}%"))
             ->when($request->group_id, fn($q, $id) => $q->where('business_group_id', $id))
             ->latest()->paginate(20);
 

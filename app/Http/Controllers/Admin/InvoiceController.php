@@ -82,8 +82,8 @@ class InvoiceController extends Controller
             ->when($request->status,   fn($q, $s)  => $q->where('status', $s))
             ->when($request->group_id, fn($q, $id) => $q->where('business_group_id', $id))
             ->when($request->search,   fn($q, $s)  =>
-                $q->where('number', 'like', "%{$s}%")
-                  ->orWhereHas('branch', fn($b) => $b->where('name', 'like', "%{$s}%")))
+                $q->where('number', 'ilike', "%{$s}%")
+                  ->orWhereHas('branch', fn($b) => $b->where('name', 'ilike', "%{$s}%")))
             ->latest()->paginate(25);
 
         return view('admin.invoices.index', compact('invoices'));

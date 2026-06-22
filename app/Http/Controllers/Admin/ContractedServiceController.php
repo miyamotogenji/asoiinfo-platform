@@ -16,7 +16,7 @@ class ContractedServiceController extends Controller
     public function index(Request $request)
     {
         $services = ContractedService::with(['businessGroup', 'legalEntity', 'branch', 'plan'])
-            ->when($request->search,   fn($q, $s)  => $q->whereHas('branch', fn($b) => $b->where('name', 'like', "%{$s}%")))
+            ->when($request->search,   fn($q, $s)  => $q->whereHas('branch', fn($b) => $b->where('name', 'ilike', "%{$s}%")))
             ->when($request->group_id, fn($q, $id) => $q->where('business_group_id', $id))
             ->when($request->status,   fn($q, $s)  => $q->where('status', $s))
             ->latest()->paginate(25);

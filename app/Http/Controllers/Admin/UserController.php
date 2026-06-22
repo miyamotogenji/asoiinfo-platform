@@ -14,7 +14,7 @@ class UserController extends Controller
     {
         $users = User::with('roles')
             ->when($request->search, fn($q, $s) =>
-                $q->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"))
+                $q->where('name', 'ilike', "%{$s}%")->orWhere('email', 'ilike', "%{$s}%"))
             ->when($request->role, fn($q, $r) => $q->role($r))
             ->latest()
             ->paginate(20);

@@ -15,7 +15,7 @@ class BranchController extends Controller
     {
         $branches = Branch::with(['legalEntity', 'businessGroup'])
             ->when($request->search, fn($q, $s) =>
-                $q->where('name', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%"))
+                $q->where('name', 'ilike', "%{$s}%")->orWhere('code', 'ilike', "%{$s}%"))
             ->when($request->group_id, fn($q, $id) => $q->where('business_group_id', $id))
             ->when($request->status,   fn($q, $s)  => $q->where('status', $s))
             ->latest()->paginate(25);
