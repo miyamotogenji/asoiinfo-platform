@@ -135,17 +135,10 @@
        style="background:linear-gradient(180deg,#0d1421 0%,#090e1a 100%);border-right:1px solid #1a2235">
 
     {{-- Brand --}}
-    <div class="flex items-center gap-3 px-5 py-5" style="border-bottom:1px solid #1a2235">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-             style="background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 4px 14px rgba(99,102,241,.4)">
-            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-            </svg>
-        </div>
-        <div>
-            <p class="text-sm font-bold text-white tracking-tight">ASOIINFO</p>
-            <p class="text-xs" style="color:#4b5563">Multiempresa Platform</p>
-        </div>
+    <div class="flex items-center gap-3 px-4 py-4" style="border-bottom:1px solid #1a2235">
+        <img src="{{ asset('logo.png') }}" alt="ASOIINFO Logo"
+             class="h-10 w-auto object-contain rounded-xl flex-shrink-0"
+             style="filter:drop-shadow(0 0 10px rgba(99,102,241,.5))">
     </div>
 
     {{-- Nav --}}

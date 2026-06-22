@@ -27,13 +27,9 @@
 
     {{-- Logo / Brand --}}
     <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-             style="background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 8px 32px rgba(99,102,241,.5)">
-            <svg class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-            </svg>
-        </div>
-        <h1 class="text-3xl font-800 text-white tracking-tight" style="font-weight:800">ASOIINFO</h1>
+        <img src="{{ asset('logo.png') }}" alt="ASOIINFO"
+             class="h-20 w-auto object-contain mx-auto mb-2"
+             style="filter:drop-shadow(0 0 20px rgba(99,102,241,.6))">
         <p class="text-sm mt-1.5" style="color:#6b7280">Sistema Multiempresa · CRM · Facturación · WhatsApp</p>
     </div>
 
