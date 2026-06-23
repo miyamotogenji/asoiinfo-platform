@@ -10,24 +10,73 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;color:#e2e8f0}
 
-/* ════ BACKGROUND — the exact reference image ════ */
-body{
-  background:#060412;
-  background-image:url('{{ asset("bg-login.png") }}');
-  background-size:cover;
-  background-position:center center;
-  background-repeat:no-repeat;
-  background-attachment:fixed;
-}
+/* ════ BACKGROUND — pure CSS aurora ════ */
+body{ background:#060412; }
 
-/* Dark veil: hides the ghost-card baked into the reference image
-   while keeping the aurora/grid/stars vivid */
+/* Left aurora — purple column */
 body::before{
   content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
-  /* Fade out the centre (where the ghost card is) more than the edges */
   background:
-    radial-gradient(ellipse 55% 65% at 50% 46%, rgba(4,2,16,.52) 0%, rgba(4,2,16,.10) 100%),
-    linear-gradient(180deg, rgba(4,2,16,.08) 0%, rgba(4,2,16,.05) 100%);
+    radial-gradient(ellipse 22% 72% at 13% 14%, rgba(168,40,255,.82) 0%, rgba(130,18,230,.48) 36%, transparent 65%),
+    radial-gradient(ellipse 16% 78% at  8% 40%, rgba(148,25,245,.60) 0%, rgba(110,10,205,.28) 55%, transparent 74%),
+    radial-gradient(ellipse 12% 42% at  6% 72%, rgba(130,20,238,.44) 0%, transparent 62%),
+    radial-gradient(ellipse 30% 55% at 20% 26%, rgba(100,16,195,.22) 0%, transparent 60%);
+  mix-blend-mode:screen;
+  filter:blur(22px);
+  animation:al 16s ease-in-out infinite alternate;
+}
+/* Right aurora — teal column */
+body::after{
+  content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 18% 65% at 88% 10%, rgba(0,228,212,.78) 0%, rgba(0,192,195,.44) 38%, transparent 64%),
+    radial-gradient(ellipse 13% 72% at 94% 34%, rgba(0,210,202,.56) 0%, rgba(0,168,182,.26) 54%, transparent 73%),
+    radial-gradient(ellipse 10% 40% at 96% 66%, rgba(0,198,200,.38) 0%, transparent 60%),
+    radial-gradient(ellipse 25% 50% at 81% 20%, rgba(0,160,185,.20) 0%, transparent 60%);
+  mix-blend-mode:screen;
+  filter:blur(26px);
+  animation:ar 19s ease-in-out infinite alternate;
+}
+@keyframes al{0%{transform:translate(-14px,-6px);opacity:.80}50%{transform:translate(10px,5px);opacity:1}100%{transform:translate(-7px,-3px);opacity:.86}}
+@keyframes ar{0%{transform:translate(16px,5px);opacity:.76}50%{transform:translate(-12px,-4px);opacity:.94}100%{transform:translate(9px,3px);opacity:.70}}
+
+/* Stars */
+.stars{
+  position:fixed;inset:0;z-index:2;pointer-events:none;
+  background-image:
+    radial-gradient(1.8px 1.8px at  9%  7%,rgba(255,255,255,.96) 0%,transparent 100%),
+    radial-gradient(1.3px 1.3px at 76% 13%,rgba(255,255,255,.72) 0%,transparent 100%),
+    radial-gradient(1.8px 1.8px at 34%  5%,rgba(255,255,255,.88) 0%,transparent 100%),
+    radial-gradient(1.3px 1.3px at 91% 28%,rgba(255,255,255,.52) 0%,transparent 100%),
+    radial-gradient(1.3px 1.3px at  4% 42%,rgba(255,255,255,.62) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 61%  4%,rgba(255,255,255,.68) 0%,transparent 100%),
+    radial-gradient(2.4px 2.4px at 51% 17%,rgba(200,138,255,.98) 0%,transparent 100%),
+    radial-gradient(2.4px 2.4px at 83% 55%,rgba(118,138,255,.98) 0%,transparent 100%),
+    radial-gradient(2.1px 2.1px at 17% 25%,rgba(0,232,212,.92)   0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 43% 11%,rgba(255,255,255,.54) 0%,transparent 100%),
+    radial-gradient(1.2px 1.2px at 27% 44%,rgba(255,255,255,.38) 0%,transparent 100%),
+    radial-gradient(1.6px 1.6px at 69% 20%,rgba(255,255,255,.70) 0%,transparent 100%),
+    radial-gradient(1.3px 1.3px at 88% 37%,rgba(212,164,255,.80) 0%,transparent 100%),
+    radial-gradient(1.2px 1.2px at 56% 31%,rgba(255,255,255,.42) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at  6% 70%,rgba(255,255,255,.32) 0%,transparent 100%),
+    radial-gradient(1.2px 1.2px at 38% 78%,rgba(255,255,255,.26) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 74% 62%,rgba(255,255,255,.34) 0%,transparent 100%);
+  animation:twinkle 10s ease-in-out infinite alternate;
+}
+@keyframes twinkle{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* Perspective neon grid floor */
+.grid-floor{
+  position:fixed;bottom:0;left:-20%;right:-20%;height:50%;z-index:2;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(145,55,255,.36) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(145,55,255,.36) 1px,transparent 1px);
+  background-size:50px 50px;
+  transform:perspective(320px) rotateX(76deg);
+  transform-origin:bottom center;
+  filter:drop-shadow(0 0 6px rgba(145,55,255,.70));
+  mask-image:linear-gradient(to top,rgba(0,0,0,.80) 0%,rgba(0,0,0,.22) 52%,transparent 78%);
+  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.80) 0%,rgba(0,0,0,.22) 52%,transparent 78%);
 }
 
 /* Top accent line */
@@ -206,6 +255,8 @@ body::before{
 </head>
 <body>
 
+<div class="stars"></div>
+<div class="grid-floor"></div>
 <div class="topline"></div>
 
 <div class="page">
