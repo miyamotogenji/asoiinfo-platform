@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión — ASOIINFO Platform</title>
+    <title>Crear Cuenta — ASOIINFO Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,9 +16,8 @@
         .bg-layer {
             position:fixed; inset:0; z-index:0;
             background:
-                radial-gradient(ellipse 800px 600px at 15% 25%, rgba(99,102,241,.1) 0%, transparent 70%),
-                radial-gradient(ellipse 600px 500px at 85% 75%, rgba(139,92,246,.08) 0%, transparent 70%),
-                radial-gradient(ellipse 400px 400px at 50% 50%, rgba(16,185,129,.04) 0%, transparent 60%);
+                radial-gradient(ellipse 800px 600px at 10% 20%, rgba(99,102,241,.1) 0%, transparent 70%),
+                radial-gradient(ellipse 600px 500px at 90% 80%, rgba(139,92,246,.08) 0%, transparent 70%);
         }
         .grid-bg {
             position:fixed; inset:0; z-index:0;
@@ -26,6 +25,7 @@
                              linear-gradient(90deg,rgba(99,102,241,.035) 1px,transparent 1px);
             background-size:64px 64px;
         }
+        /* Glowing line accent */
         .line-accent {
             position:fixed; top:0; left:0; right:0; height:2px; z-index:20;
             background:linear-gradient(90deg,transparent 0%,#6366f1 30%,#a78bfa 60%,transparent 100%);
@@ -55,20 +55,28 @@
             box-shadow:0 0 0 4px rgba(99,102,241,.1);
         }
         .inp::placeholder { color:#2d3748 }
+        .inp.error { border-color:rgba(239,68,68,.6) }
+
+        /* Password strength bar */
+        .strength-bar { height:3px; border-radius:2px; transition:all .3s; margin-top:6px }
 
         /* Button */
-        .btn-login {
+        .btn-submit {
             width:100%; padding:14px 24px; border-radius:12px;
             font-size:1rem; font-weight:700; color:#fff; border:none; cursor:pointer;
             background:linear-gradient(135deg,#6366f1,#4f46e5,#7c3aed);
             box-shadow:0 6px 24px rgba(99,102,241,.4), 0 1px 0 rgba(255,255,255,.12) inset;
             transition:all .2s; letter-spacing:.015em; font-family:inherit;
         }
-        .btn-login:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(99,102,241,.55) }
-        .btn-login:active { transform:translateY(0) }
+        .btn-submit:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(99,102,241,.55) }
+        .btn-submit:active { transform:translateY(0) }
+        .btn-submit:disabled { opacity:.5; cursor:not-allowed; transform:none }
 
         /* Label */
         .lbl { display:block; font-size:.825rem; font-weight:600; color:#6b7280; margin-bottom:7px; letter-spacing:.02em; text-transform:uppercase }
+
+        /* Error message */
+        .err-msg { font-size:.8rem; color:#f87171; margin-top:5px; display:flex; align-items:center; gap:4px }
 
         /* Animations */
         @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
@@ -94,12 +102,12 @@
                     mix-blend-mode:screen;
                     filter:drop-shadow(0 0 30px rgba(99,102,241,.8)) drop-shadow(0 0 10px rgba(167,139,250,.5))">
         <p class="mt-3 text-xs font-medium tracking-widest" style="color:#4b5563;letter-spacing:.12em">
-            SISTEMA MULTIEMPRESA &nbsp;·&nbsp; CRM &nbsp;·&nbsp; FACTURACIÓN &nbsp;·&nbsp; WHATSAPP
+            SISTEMA MULTIEMPRESA &nbsp;·&nbsp; CRM &nbsp;·&nbsp; FACTURACIÓN
         </p>
     </div>
 
     {{-- Card --}}
-    <div class="auth-card w-full fu d1" style="max-width:440px">
+    <div class="auth-card w-full fu d1" style="max-width:460px">
         <div class="p-8 md:p-10">
 
             {{-- Header --}}
@@ -108,56 +116,91 @@
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                          style="background:linear-gradient(135deg,#6366f1,#7c3aed)">
                         <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
                     </div>
-                    <h1 class="text-xl font-bold text-white" style="letter-spacing:-.02em">Iniciar sesión</h1>
+                    <h1 class="text-xl font-bold text-white" style="letter-spacing:-.02em">Crear cuenta</h1>
                 </div>
-                <p class="text-sm" style="color:#6b7280;padding-left:44px">Ingresa tus credenciales para continuar</p>
+                <p class="text-sm" style="color:#6b7280;padding-left:44px">Regístrate para acceder a la plataforma</p>
             </div>
 
-            {{-- Error alert --}}
-            @if($errors->any())
-            <div class="flex items-start gap-3 rounded-xl p-4 mb-6"
+            {{-- Global error --}}
+            @if($errors->any() && !$errors->has('name') && !$errors->has('email') && !$errors->has('password'))
+            <div class="flex items-start gap-3 rounded-xl p-4 mb-5"
                  style="background:rgba(127,29,29,.2);border:1px solid rgba(220,38,38,.35);color:#fca5a5;font-size:.875rem">
                 <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <span>{{ $errors->first() }}</span>
+                {{ $errors->first() }}
             </div>
             @endif
 
-            {{-- Success status (from register redirect) --}}
-            @if(session('status'))
-            <div class="flex items-start gap-3 rounded-xl p-4 mb-6"
-                 style="background:rgba(6,78,59,.2);border:1px solid rgba(16,185,129,.35);color:#6ee7b7;font-size:.875rem">
-                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>{{ session('status') }}</span>
-            </div>
-            @endif
-
-            <form method="POST" action="{{ route('login.post') }}" class="space-y-5">
+            <form method="POST" action="{{ route('register.post') }}" class="space-y-5" id="regForm">
                 @csrf
 
+                {{-- Name --}}
+                <div class="fu d2">
+                    <label class="lbl">Nombre completo</label>
+                    <input type="text" name="name" value="{{ old('name') }}"
+                           required autocomplete="name"
+                           placeholder="Juan García"
+                           class="inp {{ $errors->has('name') ? 'error' : '' }}">
+                    @error('name')
+                        <p class="err-msg">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                {{-- Email --}}
                 <div class="fu d3">
                     <label class="lbl">Correo electrónico</label>
                     <input type="email" name="email" value="{{ old('email') }}"
-                           required autofocus autocomplete="email"
-                           placeholder="usuario@empresa.com" class="inp">
+                           required autocomplete="email"
+                           placeholder="usuario@empresa.com"
+                           class="inp {{ $errors->has('email') ? 'error' : '' }}">
+                    @error('email')
+                        <p class="err-msg">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                            {{ $message }}
+                        </p>
+                    @enderror
                 </div>
 
+                {{-- Password --}}
                 <div class="fu d4">
                     <label class="lbl">Contraseña</label>
-                    <input type="password" name="password" required
-                           autocomplete="current-password"
-                           placeholder="••••••••••" class="inp">
+                    <input type="password" name="password" id="pw" required
+                           autocomplete="new-password"
+                           placeholder="Mínimo 8 caracteres"
+                           class="inp {{ $errors->has('password') ? 'error' : '' }}"
+                           oninput="checkStrength(this.value)">
+                    <div id="strengthBar" class="strength-bar" style="background:#1e2a42;width:0%"></div>
+                    <p id="strengthTxt" class="text-xs mt-1" style="color:#374151;min-height:16px"></p>
+                    @error('password')
+                        <p class="err-msg">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                            {{ $message }}
+                        </p>
+                    @enderror
                 </div>
 
+                {{-- Confirm --}}
+                <div class="fu d4">
+                    <label class="lbl">Confirmar contraseña</label>
+                    <input type="password" name="password_confirmation" id="pwc" required
+                           autocomplete="new-password"
+                           placeholder="Repite tu contraseña"
+                           class="inp"
+                           oninput="checkMatch()">
+                    <p id="matchTxt" class="text-xs mt-1" style="min-height:16px"></p>
+                </div>
+
+                {{-- Submit --}}
                 <div class="fu d5 pt-1">
-                    <button type="submit" class="btn-login">
-                        Ingresar al sistema &nbsp;→
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        Crear cuenta &nbsp;→
                     </button>
                 </div>
             </form>
@@ -168,12 +211,12 @@
         <div class="px-8 md:px-10 py-5 text-center"
              style="border-top:1px solid rgba(30,42,66,.7)">
             <p class="text-sm" style="color:#6b7280">
-                ¿No tienes cuenta?
-                <a href="{{ route('register') }}"
+                ¿Ya tienes cuenta?
+                <a href="{{ route('login') }}"
                    style="color:#818cf8;font-weight:600;text-decoration:none"
                    onmouseover="this.style.color='#a5b4fc'"
                    onmouseout="this.style.color='#818cf8'">
-                    Crear cuenta →
+                    Iniciar sesión →
                 </a>
             </p>
         </div>
@@ -188,25 +231,48 @@
             <span style="width:5px;height:5px;border-radius:50%;background:#6366f1;flex-shrink:0"></span>Facturación Automática
         </span>
         <span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:50px;background:rgba(12,18,32,.8);border:1px solid rgba(30,42,66,.8);font-size:.8rem;color:#6b7280">
-            <span style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0"></span>Reportes en Tiempo Real
-        </span>
-        <span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:50px;background:rgba(12,18,32,.8);border:1px solid rgba(30,42,66,.8);font-size:.8rem;color:#6b7280">
             <span style="width:5px;height:5px;border-radius:50%;background:#10b981;flex-shrink:0"></span>CRM Multiempresa
         </span>
     </div>
 
-    {{-- Demo credentials (subtle) --}}
-    <div class="mt-5 text-center space-y-1 fu d5">
-        <p style="font-size:.75rem;color:#1f2937">
-            <span style="color:#374151;font-weight:600">Admin:</span>
-            <span style="color:#4b5563"> admin@asoiinfo.com &nbsp;/&nbsp; Admin2026!</span>
-        </p>
-        <p style="font-size:.75rem;color:#1f2937">
-            <span style="color:#374151;font-weight:600">Asesor:</span>
-            <span style="color:#4b5563"> asesor@asoiinfo.com &nbsp;/&nbsp; Agent2026!</span>
-        </p>
-    </div>
-
 </div>
+
+<script>
+function checkStrength(val) {
+    const bar = document.getElementById('strengthBar');
+    const txt = document.getElementById('strengthTxt');
+    if (!val) { bar.style.width='0%'; txt.textContent=''; return; }
+    let score = 0;
+    if (val.length >= 8)  score++;
+    if (val.length >= 12) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const levels = [
+        {w:'20%', c:'#ef4444', t:'Muy débil'},
+        {w:'40%', c:'#f97316', t:'Débil'},
+        {w:'60%', c:'#eab308', t:'Regular'},
+        {w:'80%', c:'#84cc16', t:'Fuerte'},
+        {w:'100%',c:'#22c55e', t:'Muy fuerte'},
+    ];
+    const l = levels[Math.min(score-1, 4)] || levels[0];
+    bar.style.width = l.w; bar.style.background = l.c;
+    txt.textContent = l.t; txt.style.color = l.c;
+    checkMatch();
+}
+function checkMatch() {
+    const pw = document.getElementById('pw').value;
+    const pwc = document.getElementById('pwc').value;
+    const txt = document.getElementById('matchTxt');
+    if (!pwc) { txt.textContent=''; return; }
+    if (pw === pwc) {
+        txt.textContent = '✓ Las contraseñas coinciden';
+        txt.style.color = '#22c55e';
+    } else {
+        txt.textContent = '✗ Las contraseñas no coinciden';
+        txt.style.color = '#ef4444';
+    }
+}
+</script>
 </body>
 </html>

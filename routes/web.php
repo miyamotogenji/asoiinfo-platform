@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BusinessGroupController;
 use App\Http\Controllers\Admin\LegalEntityController;
@@ -17,9 +18,11 @@ use App\Http\Controllers\Admin\UserController;
 // ─── Public ──────────────────────────────────────────────────────────────────
 Route::get('/',      fn() => redirect()->route('login'));
 Route::get('/admin', fn() => redirect()->route('admin.dashboard'));
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login',[LoginController::class, 'login'])->name('login.post');
-Route::post('/logout',[LoginController::class,'logout'])->name('logout');
+Route::get('/login',    [LoginController::class,   'showLoginForm'])->name('login');
+Route::post('/login',   [LoginController::class,   'login'])->name('login.post');
+Route::post('/logout',  [LoginController::class,   'logout'])->name('logout');
+Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
+Route::post('/register',[RegisterController::class, 'register'])->name('register.post');
 
 // ─── Admin — authenticated ───────────────────────────────────────────────────
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {

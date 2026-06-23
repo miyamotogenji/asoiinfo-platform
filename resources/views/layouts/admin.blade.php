@@ -9,7 +9,7 @@
     {{-- Premium fonts: Plus Jakarta Sans + JetBrains Mono --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -17,8 +17,8 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', 'monospace'],
+                        sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        mono: ['"Space Mono"', 'monospace'],
                     },
                     colors: {
                         base: { 950: '#060b14', 900: '#090e1a', 800: '#0f1623', 700: '#151d2e', 600: '#1c2640' },
@@ -122,7 +122,7 @@
     </style>
     @stack('styles')
 </head>
-<body class="h-full bg-base-950 text-gray-100" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif"
+<body class="h-full bg-base-950 text-gray-100" style="font-family:'Space Grotesk',system-ui,sans-serif"
       x-data="{ sidebarOpen: false, notifOpen: false }">
 
 {{-- Mobile overlay --}}
@@ -135,10 +135,11 @@
        style="background:linear-gradient(180deg,#0d1421 0%,#090e1a 100%);border-right:1px solid #1a2235">
 
     {{-- Brand --}}
-    <div class="flex items-center gap-3 px-4 py-4" style="border-bottom:1px solid #1a2235">
+    <div class="flex items-center px-4 py-3" style="border-bottom:1px solid #1a2235">
         <img src="{{ asset('logo.png') }}" alt="ASOIINFO Logo"
-             class="h-10 w-auto object-contain rounded-xl flex-shrink-0"
-             style="filter:drop-shadow(0 0 10px rgba(99,102,241,.5))">
+             style="height:52px;width:auto;object-fit:contain;
+                    mix-blend-mode:screen;
+                    filter:drop-shadow(0 0 12px rgba(99,102,241,.6))">
     </div>
 
     {{-- Nav --}}
