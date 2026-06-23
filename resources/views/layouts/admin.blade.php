@@ -6,10 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'ASOIINFO') — ASOIINFO Platform</title>
 
-    {{-- Premium fonts: Plus Jakarta Sans + JetBrains Mono --}}
+    {{-- Premium fonts: Inter + Space Grotesk --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -17,8 +17,8 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['"Sora"', 'system-ui', 'sans-serif'],
-                        mono: ['"Fira Code"', 'monospace'],
+                        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+                        mono: ['"Space Grotesk"', 'monospace'],
                     },
                     colors: {
                         base: { 950: '#060b14', 900: '#090e1a', 800: '#0f1623', 700: '#151d2e', 600: '#1c2640' },
@@ -68,7 +68,7 @@
             padding:18px 14px 8px;
             font-size:.67rem; font-weight:700;
             letter-spacing:.12em; text-transform:uppercase;
-            color:#1f2937;
+            color:#374151;
         }
 
         /* ── Cards ── */
@@ -184,49 +184,54 @@
        style="background:linear-gradient(180deg,#060b18 0%,#04080f 100%);border-right:1px solid rgba(30,42,66,.5);box-shadow:4px 0 32px rgba(0,0,0,.5)">
 
     {{-- Brand --}}
-    <div class="flex items-center gap-3 px-4 py-4" style="border-bottom:1px solid rgba(30,42,66,.5)">
+    <div class="flex items-center gap-3 px-4 py-5" style="border-bottom:1px solid rgba(30,42,66,.5)">
 
-        {{-- Animated gradient logo mark --}}
-        <div style="
-            width:42px;height:42px;border-radius:14px;flex-shrink:0;
-            background:linear-gradient(145deg,#4f46e5 0%,#7c3aed 52%,#a855f7 100%);
-            display:flex;align-items:center;justify-content:center;
-            box-shadow:0 6px 24px rgba(124,58,237,.58),inset 0 1.5px 0 rgba(255,255,255,.22);
-            position:relative;overflow:hidden;">
-            {{-- shimmer --}}
+        {{-- Purple orb / galaxy logo --}}
+        <div style="position:relative;flex-shrink:0;width:52px;height:52px">
+            {{-- Outer glow ring --}}
             <div style="
-                position:absolute;top:0;left:-60%;width:40%;height:100%;
-                background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);
-                transform:skewX(-14deg);
-                animation:logoShim 3.5s ease-in-out infinite;"></div>
-            <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
-                <defs>
-                    <linearGradient id="sg1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#c4b5fd"/>
-                        <stop offset="100%" stop-color="#67e8f9"/>
-                    </linearGradient>
-                </defs>
-                <path d="M22 14C17.582 14 14 17.582 14 22C14 26.418 17.582 30 22 30L26 30C26.552 30 27 29.552 27 29C27 28.448 26.552 28 26 28L22 28C18.686 28 16 25.314 16 22C16 18.686 18.686 16 22 16L26 16C26.552 16 27 15.552 27 15C27 14.448 26.552 14 26 14L22 14Z" fill="url(#sg1)"/>
-                <path d="M26 18C30.418 18 34 21.582 34 26C34 30.418 30.418 34 26 34L22 34C21.448 34 21 33.552 21 33C21 32.448 21.448 32 22 32L26 32C29.314 32 32 29.314 32 26C32 22.686 29.314 20 26 20L22 20C21.448 20 21 19.552 21 19C21 18.448 21.448 18 22 18L26 18Z" fill="url(#sg1)"/>
-                <rect x="20" y="21" width="8" height="6" rx="3" fill="url(#sg1)" opacity=".8"/>
-            </svg>
+                position:absolute;inset:-4px;border-radius:50%;
+                background:conic-gradient(from 0deg,#7c3aed,#a855f7,#818cf8,#6366f1,#7c3aed);
+                animation:orbSpin 6s linear infinite;
+                opacity:.7;filter:blur(2px);">
+            </div>
+            {{-- Orb body --}}
+            <div style="
+                position:absolute;inset:0;border-radius:50%;
+                background:radial-gradient(circle at 35% 35%,#a78bfa 0%,#7c3aed 40%,#4c1d95 80%,#1e1040 100%);
+                box-shadow:0 0 24px rgba(124,58,237,.80),0 0 48px rgba(124,58,237,.40),inset 0 2px 4px rgba(255,255,255,.25);
+                display:flex;align-items:center;justify-content:center;
+                overflow:hidden;">
+                {{-- Equator ring --}}
+                <div style="
+                    position:absolute;width:110%;height:14px;
+                    background:rgba(167,139,250,.22);
+                    transform:rotate(-20deg);
+                    border-radius:50%;"></div>
+                {{-- Chain SVG --}}
+                <svg width="26" height="26" viewBox="0 0 48 48" fill="none" style="position:relative;z-index:1">
+                    <path d="M22 15C18.134 15 15 18.134 15 22C15 25.866 18.134 29 22 29H26C26.552 29 27 28.552 27 28C27 27.448 26.552 27 26 27H22C19.239 27 17 24.761 17 22C17 19.239 19.239 17 22 17H26C26.552 17 27 16.552 27 16C27 15.448 26.552 15 26 15H22Z" fill="white" opacity=".9"/>
+                    <path d="M26 19C29.866 19 33 22.134 33 26C33 29.866 29.866 33 26 33H22C21.448 33 21 32.552 21 32C21 31.448 21.448 31 22 31H26C28.761 31 31 28.761 31 26C31 23.239 28.761 21 26 21H22C21.448 21 21 20.552 21 20C21 19.448 21.448 19 22 19H26Z" fill="white" opacity=".9"/>
+                    <rect x="20" y="22" width="8" height="4" rx="2" fill="white" opacity=".7"/>
+                </svg>
+            </div>
         </div>
 
         {{-- Wordmark --}}
         <div>
             <div style="
-                font-family:'Space Grotesk','Sora',sans-serif;
-                font-size:1.05rem;font-weight:700;letter-spacing:.08em;
-                background:linear-gradient(90deg,#c4b5fd,#a5b4fc,#67e8f9);
+                font-size:1.18rem;font-weight:800;letter-spacing:.06em;line-height:1;
+                background:linear-gradient(90deg,#e0d7ff 0%,#c4b5fd 40%,#93c5fd 100%);
                 -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-                background-clip:text;line-height:1.2;">ASOIINFO</div>
-            <div style="font-size:.62rem;color:#1f2937;letter-spacing:.06em;font-weight:500;margin-top:1px">Plataforma Multiempresa</div>
+                background-clip:text;">ASOIINFO</div>
+            <div style="font-size:.62rem;color:#1e2a3a;letter-spacing:.05em;font-weight:500;margin-top:3px">
+                Plataforma Multiempresa
+            </div>
         </div>
     </div>
 
     <style>
-    @keyframes logoShim{0%{left:-60%}55%,100%{left:120%}}
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap');
+    @keyframes orbSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
     </style>
 
     {{-- Nav --}}
