@@ -38,91 +38,140 @@
 
     <style>
         [x-cloak]{display:none!important}
-        * { font-feature-settings: "cv02","cv03","cv04","cv11" }
+        *, *::before, *::after { font-feature-settings:"cv02","cv03","cv04","cv11"; box-sizing:border-box }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width:5px; height:5px }
-        ::-webkit-scrollbar-track { background:#0f1623 }
-        ::-webkit-scrollbar-thumb { background:#2d3748; border-radius:4px }
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width:4px; height:4px }
+        ::-webkit-scrollbar-track { background:transparent }
+        ::-webkit-scrollbar-thumb { background:#1e2a42; border-radius:4px }
         ::-webkit-scrollbar-thumb:hover { background:#6366f1 }
 
-        /* Navigation */
+        /* ── Nav links ── */
         .nav-link {
             display:flex; align-items:center; gap:10px;
-            padding:9px 12px; border-radius:10px;
-            font-size:.8rem; font-weight:500;
-            color:#6b7280; text-decoration:none;
-            transition:all .15s; border:1px solid transparent;
+            padding:9px 13px; border-radius:12px;
+            font-size:.815rem; font-weight:500; letter-spacing:-.005em;
+            color:#4b5563; text-decoration:none;
+            transition:all .18s ease;
         }
-        .nav-link:hover { background:#1a2235; color:#e5e7eb; border-color:#1e2a42 }
+        .nav-link:hover {
+            background:rgba(99,102,241,.08);
+            color:#c7d2fe;
+        }
         .nav-link.active {
-            background:linear-gradient(135deg,#1e2a42,#1a2235);
-            color:#818cf8; border-color:#2d3a5a;
-            box-shadow:0 0 12px rgba(99,102,241,.12);
+            background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(124,58,237,.12));
+            color:#a5b4fc;
+            box-shadow:inset 0 0 0 1px rgba(99,102,241,.2), 0 2px 12px rgba(99,102,241,.08);
         }
-        .nav-link.active .nav-icon { color:#6366f1 }
+        .nav-link.active .nav-icon { color:#818cf8 }
+        .nav-section {
+            padding:18px 14px 8px;
+            font-size:.67rem; font-weight:700;
+            letter-spacing:.12em; text-transform:uppercase;
+            color:#1f2937;
+        }
 
-        /* Cards */
+        /* ── Cards ── */
         .card-glass {
-            background:linear-gradient(135deg,#111827,#0f1623);
-            border:1px solid #1e2a42; border-radius:14px;
+            background:rgba(10,15,28,.8);
+            border:1px solid rgba(30,42,66,.8);
+            border-radius:18px;
+            box-shadow:0 4px 24px rgba(0,0,0,.25);
         }
-        .stat-card-gradient-indigo { background:linear-gradient(135deg,#1e1b4b10,#1e1b4b30); border-color:#3730a360 }
-        .stat-card-gradient-emerald { background:linear-gradient(135deg,#064e3b10,#064e3b30); border-color:#06543660 }
-        .stat-card-gradient-amber { background:linear-gradient(135deg,#78350f10,#78350f30); border-color:#92400e60 }
-        .stat-card-gradient-red { background:linear-gradient(135deg,#7f1d1d10,#7f1d1d30); border-color:#991b1b60 }
+        .stat-card-gradient-indigo { background:linear-gradient(135deg,rgba(30,27,75,.35),rgba(30,27,75,.15)); border-color:rgba(55,48,163,.25) }
+        .stat-card-gradient-emerald { background:linear-gradient(135deg,rgba(6,78,59,.35),rgba(6,78,59,.15)); border-color:rgba(6,84,54,.25) }
+        .stat-card-gradient-amber   { background:linear-gradient(135deg,rgba(120,53,15,.35),rgba(120,53,15,.15)); border-color:rgba(146,64,14,.25) }
+        .stat-card-gradient-red     { background:linear-gradient(135deg,rgba(127,29,29,.35),rgba(127,29,29,.15)); border-color:rgba(153,27,27,.25) }
 
-        /* Table */
-        .data-table thead tr { background:rgba(9,14,26,.8) }
-        .data-table tbody tr { transition:background .1s }
-        .data-table tbody tr:hover { background:rgba(26,34,53,.5) }
-        .data-table td,.data-table th { padding:12px 16px }
+        /* ── Tables ── */
+        .data-table { border-collapse:separate; border-spacing:0 }
+        .data-table thead th { background:rgba(5,9,18,.9); font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#374151; padding:12px 16px }
+        .data-table thead th:first-child { border-radius:10px 0 0 10px }
+        .data-table thead th:last-child  { border-radius:0 10px 10px 0 }
+        .data-table tbody tr { transition:background .15s }
+        .data-table tbody tr:hover td { background:rgba(99,102,241,.05) }
+        .data-table td { padding:13px 16px; border-bottom:1px solid rgba(30,42,66,.4); font-size:.86rem }
+        .data-table tbody tr:last-child td { border-bottom:none }
 
-        /* Badges */
-        .badge-active   { background:#064e3b40; color:#6ee7b7; border:1px solid #06543640 }
-        .badge-blocked  { background:#7f1d1d40; color:#fca5a5; border:1px solid #991b1b40 }
-        .badge-pending  { background:#78350f40; color:#fcd34d; border:1px solid #92400e40 }
-        .badge-overdue  { background:#7f1d1d40; color:#f87171; border:1px solid #b91c1c40 }
-        .badge-paid     { background:#064e3b40; color:#34d399; border:1px solid #06543640 }
-        .badge-info     { background:#1e3a5f40; color:#93c5fd; border:1px solid #1e40af40 }
-        .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:600 }
+        /* ── Badges ── */
+        .badge { display:inline-flex; align-items:center; gap:4px; padding:4px 11px; border-radius:20px; font-size:.7rem; font-weight:700; letter-spacing:.02em }
+        .badge-active   { background:rgba(6,78,59,.3);  color:#34d399; border:1px solid rgba(6,84,54,.3) }
+        .badge-blocked  { background:rgba(127,29,29,.3); color:#fca5a5; border:1px solid rgba(153,27,27,.3) }
+        .badge-pending  { background:rgba(120,53,15,.3); color:#fcd34d; border:1px solid rgba(146,64,14,.3) }
+        .badge-overdue  { background:rgba(127,29,29,.3); color:#f87171; border:1px solid rgba(185,28,28,.3) }
+        .badge-paid     { background:rgba(6,78,59,.3);  color:#6ee7b7; border:1px solid rgba(6,84,54,.3) }
+        .badge-info     { background:rgba(30,58,95,.3);  color:#93c5fd; border:1px solid rgba(30,64,175,.3) }
 
-        /* Input */
+        /* ── Inputs ── */
         .form-input {
-            width:100%; background:#090e1a; border:1px solid #1e2a42;
-            border-radius:10px; padding:10px 14px;
-            font-size:.875rem; color:#e5e7eb;
-            font-family:inherit; outline:none; transition:all .15s;
+            width:100%; background:rgba(4,8,18,.9);
+            border:1.5px solid rgba(30,42,66,.9);
+            border-radius:12px; padding:11px 15px;
+            font-size:.9rem; color:#e5e7eb;
+            font-family:inherit; outline:none; transition:all .18s;
         }
-        .form-input:focus { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.1) }
-        .form-input::placeholder { color:#374151 }
-        select.form-input option { background:#111827 }
+        .form-input:focus { border-color:#6366f1; box-shadow:0 0 0 4px rgba(99,102,241,.1), 0 0 16px rgba(99,102,241,.06) }
+        .form-input::placeholder { color:#1f2937 }
+        select.form-input option { background:#0d1420 }
         textarea.form-input { resize:vertical }
 
-        /* Buttons */
-        .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:10px; font-size:.825rem; font-weight:600; cursor:pointer; border:none; transition:all .15s; font-family:inherit; text-decoration:none }
-        .btn-primary { background:linear-gradient(135deg,#6366f1,#4f46e5); color:#fff; box-shadow:0 4px 14px rgba(99,102,241,.3) }
-        .btn-primary:hover { background:linear-gradient(135deg,#818cf8,#6366f1); box-shadow:0 6px 20px rgba(99,102,241,.4) }
-        .btn-success { background:linear-gradient(135deg,#059669,#047857); color:#fff; box-shadow:0 4px 14px rgba(5,150,105,.25) }
-        .btn-success:hover { background:linear-gradient(135deg,#10b981,#059669) }
-        .btn-danger { background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff }
-        .btn-ghost { background:#1a2235; color:#9ca3af; border:1px solid #1e2a42 }
-        .btn-ghost:hover { background:#1e2a42; color:#e5e7eb }
-        .btn-sm { padding:6px 12px; font-size:.775rem; border-radius:8px }
+        /* ── Buttons ── */
+        .btn {
+            display:inline-flex; align-items:center; gap:7px;
+            padding:10px 20px; border-radius:12px;
+            font-size:.845rem; font-weight:600; letter-spacing:.01em;
+            cursor:pointer; border:none; transition:all .2s ease;
+            font-family:inherit; text-decoration:none; line-height:1;
+        }
+        .btn:hover { transform:translateY(-1px) }
+        .btn:active { transform:translateY(0) }
 
-        /* Page title */
-        .page-heading { font-size:1.3rem; font-weight:700; color:#f9fafb; letter-spacing:-.02em }
-        .page-sub { font-size:.825rem; color:#6b7280; margin-top:2px }
+        .btn-primary {
+            background:linear-gradient(135deg,#6366f1,#4f46e5,#7c3aed);
+            color:#fff;
+            box-shadow:0 4px 18px rgba(99,102,241,.35), 0 1px 0 rgba(255,255,255,.1) inset;
+        }
+        .btn-primary:hover { box-shadow:0 8px 28px rgba(99,102,241,.5) }
 
-        /* Animations */
-        @keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-        .animate-slide-in { animation:slideIn .2s ease }
-        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+        .btn-success {
+            background:linear-gradient(135deg,#059669,#047857);
+            color:#fff;
+            box-shadow:0 4px 18px rgba(5,150,105,.3), 0 1px 0 rgba(255,255,255,.1) inset;
+        }
+        .btn-success:hover { box-shadow:0 8px 24px rgba(5,150,105,.45) }
+
+        .btn-danger {
+            background:linear-gradient(135deg,#dc2626,#b91c1c);
+            color:#fff;
+            box-shadow:0 4px 18px rgba(220,38,38,.3);
+        }
+        .btn-danger:hover { box-shadow:0 8px 24px rgba(220,38,38,.45) }
+
+        .btn-ghost {
+            background:rgba(15,22,40,.9);
+            color:#9ca3af;
+            border:1.5px solid rgba(30,42,66,.9);
+        }
+        .btn-ghost:hover { background:rgba(26,34,58,.9); color:#e5e7eb; border-color:rgba(99,102,241,.3) }
+
+        .btn-sm { padding:7px 14px; font-size:.8rem; border-radius:10px; gap:5px }
+        .btn-xs { padding:5px 11px; font-size:.75rem; border-radius:8px; gap:4px }
+
+        /* ── Page heading ── */
+        .page-heading { font-size:1.5rem; font-weight:700; color:#f1f5f9; letter-spacing:-.035em; line-height:1.2 }
+        .page-sub { font-size:.85rem; color:#6b7280; margin-top:3px; line-height:1.4 }
+
+        /* ── Animations ── */
+        @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+        .animate-slide-in { animation:slideIn .25s ease }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.35} }
         .animate-pulse-dot { animation:pulse-dot 2s ease infinite }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-up { animation:fadeInUp .3s ease }
     </style>
     @stack('styles')
 </head>
-<body class="h-full bg-base-950 text-gray-100" style="font-family:'Sora',system-ui,sans-serif"
+<body class="h-full text-gray-100" style="font-family:'Sora',system-ui,sans-serif;background:#040810"
       x-data="{ sidebarOpen: false, notifOpen: false }">
 
 {{-- Mobile overlay --}}
@@ -132,14 +181,14 @@
 {{-- ══════════════════ SIDEBAR ══════════════════ --}}
 <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
        class="fixed inset-y-0 left-0 z-40 w-64 flex flex-col transition-transform duration-200 lg:translate-x-0"
-       style="background:linear-gradient(180deg,#0d1421 0%,#090e1a 100%);border-right:1px solid #1a2235">
+       style="background:linear-gradient(180deg,#060b18 0%,#04080f 100%);border-right:1px solid rgba(30,42,66,.5);box-shadow:4px 0 32px rgba(0,0,0,.5)">
 
     {{-- Brand --}}
-    <div class="flex items-center px-4 py-3" style="border-bottom:1px solid #1a2235">
+    <div class="flex items-center px-4 py-4" style="border-bottom:1px solid rgba(30,42,66,.5)">
         <img src="{{ asset('logo.png') }}" alt="ASOIINFO Logo"
-             style="height:52px;width:auto;object-fit:contain;
+             style="height:58px;width:auto;object-fit:contain;
                     mix-blend-mode:screen;
-                    filter:drop-shadow(0 0 12px rgba(99,102,241,.6))">
+                    filter:drop-shadow(0 0 18px rgba(99,102,241,.8)) drop-shadow(0 0 6px rgba(168,85,247,.4))">
     </div>
 
     {{-- Nav --}}
@@ -151,7 +200,7 @@
         @endphp
 
         {{-- Principal --}}
-        <p class="px-3 pt-1 pb-2 text-xs font-700 tracking-widest uppercase" style="color:#374151;font-weight:700">Principal</p>
+        <p class="nav-section">Principal</p>
 
         <a href="{{ route('admin.dashboard') }}"
            class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -170,7 +219,7 @@
         </a>
 
         {{-- Clientes --}}
-        <p class="px-3 pt-4 pb-2 text-xs font-700 tracking-widest uppercase" style="color:#374151;font-weight:700">Clientes CRM</p>
+        <p class="nav-section">Clientes CRM</p>
 
         <a href="{{ route('admin.grupos.index') }}" class="nav-link {{ request()->routeIs('admin.grupos.*') ? 'active' : '' }}">
             <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -204,8 +253,8 @@
             Contactos
         </a>
 
-        {{-- Facturación — Phase 1 active ─────────────────────────────── --}}
-        <p class="px-3 pt-4 pb-2 text-xs font-700 tracking-widest uppercase" style="color:#374151;font-weight:700">Facturación</p>
+        {{-- Facturación --}}
+        <p class="nav-section">Facturación</p>
 
         <a href="{{ route('admin.planes.index') }}" class="nav-link {{ request()->routeIs('admin.planes.*') ? 'active' : '' }}">
             <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -271,7 +320,7 @@
         </div>
 
         {{-- Reportes --}}
-        <p class="px-3 pt-4 pb-2 text-xs font-700 tracking-widest uppercase" style="color:#374151;font-weight:700">Reportes</p>
+        <p class="nav-section">Reportes</p>
 
         <a href="{{ route('admin.reports.financial') }}" class="nav-link {{ request()->routeIs('admin.reports.financial') ? 'active':'' }}">
             <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -288,7 +337,7 @@
         </a>
 
         {{-- Administración --}}
-        <p class="px-3 pt-4 pb-2 text-xs font-700 tracking-widest uppercase" style="color:#374151;font-weight:700">Administración</p>
+        <p class="nav-section">Administración</p>
 
         <a href="{{ route('admin.usuarios.index') }}" class="nav-link {{ request()->routeIs('admin.usuarios.*') ? 'active':'' }}">
             <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -299,19 +348,23 @@
     </nav>
 
     {{-- User footer --}}
-    <div class="px-3 py-4" style="border-top:1px solid #1a2235">
-        <div class="flex items-center gap-3 px-2 py-2 rounded-xl" style="background:#0f1623">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                 style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+    <div class="px-3 py-4" style="border-top:1px solid rgba(30,42,66,.5)">
+        <div class="flex items-center gap-3 px-3 py-2.5 rounded-2xl" style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.12)">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                 style="background:linear-gradient(135deg,#6366f1,#7c3aed);box-shadow:0 4px 12px rgba(99,102,241,.35)">
                 {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 2)) }}
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-gray-200 truncate">{{ auth()->user()->name ?? 'Admin' }}</p>
+                <p class="text-sm font-semibold truncate" style="color:#e2e8f0">{{ auth()->user()->name ?? 'Admin' }}</p>
                 <p class="text-xs truncate" style="color:#4b5563">{{ auth()->user()->roles->first()->name ?? 'admin' }}</p>
             </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" title="Salir" class="p-1.5 rounded-lg transition-colors" style="color:#4b5563" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#4b5563'">
+                <button type="submit" title="Salir"
+                        class="p-2 rounded-xl transition-all"
+                        style="color:#4b5563;background:rgba(239,68,68,.0)"
+                        onmouseover="this.style.background='rgba(239,68,68,.12)';this.style.color='#f87171'"
+                        onmouseout="this.style.background='transparent';this.style.color='#4b5563'">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
@@ -325,8 +378,8 @@
 <div class="lg:pl-64 flex flex-col min-h-screen">
 
     {{-- Top bar --}}
-    <header class="sticky top-0 z-20 px-4 lg:px-6 h-14 flex items-center gap-4 backdrop-blur-md"
-            style="background:rgba(9,14,26,.85);border-bottom:1px solid #1a2235">
+    <header class="sticky top-0 z-20 px-4 lg:px-6 h-14 flex items-center gap-4 backdrop-blur-xl"
+            style="background:rgba(4,8,16,.88);border-bottom:1px solid rgba(30,42,66,.45);box-shadow:0 1px 0 rgba(99,102,241,.05)">
 
         <button @click="sidebarOpen=true" class="lg:hidden p-1.5 rounded-lg" style="color:#6b7280">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
