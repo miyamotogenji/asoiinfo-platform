@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\{
     BranchController, ContactController, PlanController,
     ContractedServiceController, CxcController, ReportController,
     ComingSoonController, UserController, InvoiceController,
-    AuditLogController
+    AuditLogController, TwoFactorController
 };
 
 // ─── Public ───────────────────────────────────────────────────────────────────
@@ -19,6 +19,12 @@ Route::post('/login',   [LoginController::class,    'login'])->name('login.post'
 Route::post('/logout',  [LoginController::class,    'logout'])->name('logout');
 Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
 Route::post('/register',[RegisterController::class, 'register'])->name('register.post');
+
+// ─── 2FA challenge (auth required but before 2fa_verified) ───────────────────
+Route::middleware(['auth'])->group(function () {
+    Route::get( 'admin/two-factor/challenge', [TwoFactorController::class, 'challenge'])->name('admin.two-factor.challenge');
+    Route::post('admin/two-factor/verify',    [TwoFactorController::class, 'verify'])->name('admin.two-factor.verify');
+});
 
 // ─── Admin — authenticated ────────────────────────────────────────────────────
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
@@ -64,6 +70,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // ── M5: Audit Log ────────────────────────────────────────────────────────
     Route::get('auditoria', [AuditLogController::class, 'index'])->name('audit.index');
+
+    // ── M5: Two-Factor Authentication ─────────────────────────────────────────
+    Route::get( 'two-factor',          [TwoFactorController::class, 'show'])->name('two-factor.show');
+    Route::post('two-factor/enable',   [TwoFactorController::class, 'enable'])->name('two-factor.enable');
+    Route::post('two-factor/confirm',  [TwoFactorController::class, 'confirm'])->name('two-factor.confirm');
+    Route::delete('two-factor/disable',[TwoFactorController::class, 'disable'])->name('two-factor.disable');
 
     // ── Users & Roles ────────────────────────────────────────────────────────
     Route::resource('usuarios', UserController::class)->except(['show']);

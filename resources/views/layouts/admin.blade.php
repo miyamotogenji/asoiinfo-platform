@@ -384,6 +384,16 @@
             </svg>
             Usuarios y roles
         </a>
+
+        <a href="{{ route('admin.two-factor.show') }}" class="nav-link {{ request()->routeIs('admin.two-factor.*') ? 'active':'' }}">
+            <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            Seguridad 2FA
+            @if(auth()->user()?->two_factor_confirmed)
+            <span class="ml-auto text-xs px-1.5 py-0.5 rounded" style="background:#05966920;color:#10b981;font-size:10px">ON</span>
+            @endif
+        </a>
     </nav>
 
     {{-- User footer --}}

@@ -13,13 +13,14 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = ['name', 'email', 'password', 'two_factor_secret', 'two_factor_confirmed'];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'two_factor_secret'];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password'          => 'hashed',
+        'email_verified_at'     => 'datetime',
+        'password'              => 'hashed',
+        'two_factor_confirmed'  => 'boolean',
     ];
 
     public function conversations(): HasMany
