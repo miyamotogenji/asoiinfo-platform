@@ -67,7 +67,7 @@ fi
 php artisan config:cache || echo "[skip] config:cache"
 php artisan route:cache  || echo "[skip] route:cache"
 
-APP_PORT=${PORT:-80}
+APP_PORT=${PORT:-10000}
 echo "=============================="
 echo " Starting PHP server on :${APP_PORT}"
 echo "=============================="
