@@ -2,10 +2,10 @@ FROM php:8.2-cli
 
 # System deps
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libxml2-dev libzip-dev \
+    git curl zip unzip libxml2-dev libzip-dev \
     libonig-dev libpq-dev libsqlite3-dev sqlite3 \
     && docker-php-ext-install pdo pdo_pgsql pdo_sqlite \
-       mbstring zip exif pcntl bcmath gd opcache \
+       mbstring zip pcntl bcmath opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Composer
