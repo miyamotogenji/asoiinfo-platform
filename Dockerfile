@@ -34,5 +34,5 @@ RUN mkdir -p storage/framework/{sessions,views,cache/data} storage/logs bootstra
 COPY docker-entrypoint.sh /entrypoint.sh
 RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
-EXPOSE 80
+EXPOSE 10000
 CMD ["/entrypoint.sh"]
