@@ -14,33 +14,39 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Install PHP dependencies
+# Install PHP dependencies (with lock file for reproducible builds)
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Copy application
+# Copy application source
 COPY . .
 
-# Post-install scripts
-RUN composer run-script post-autoload-dump --no-interaction 2>/dev/null || true
+# Use .env.example so artisan commands work during build
+# (generates bootstrap/cache/packages.php and services.php)
+RUN cp .env.example .env \
+    && php artisan package:discover --ansi 2>/dev/null || true \
+    && php artisan config:clear     2>/dev/null || true \
+    && rm -f .env
 
-# Storage permissions
+# Storage & cache permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} \
               storage/logs bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
 # Apache: serve from public/
-RUN echo '<VirtualHost *:80>\n\
+RUN printf '<VirtualHost *:80>\n\
     DocumentRoot /var/www/html/public\n\
     <Directory /var/www/html/public>\n\
         AllowOverride All\n\
         Require all granted\n\
-        Options -Indexes\n\
+        Options -Indexes +FollowSymLinks\n\
     </Directory>\n\
-</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+    ErrorLog  ${APACHE_LOG_DIR}/error.log\n\
+    CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
+</VirtualHost>\n' > /etc/apache2/sites-available/000-default.conf
 
-# Startup — sed strips Windows CRLF so bash shebang/heredocs work on Linux
+# Startup script — strip CRLF so bash shebang works on Linux
 COPY docker-entrypoint.sh /entrypoint.sh
 RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
