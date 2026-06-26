@@ -1,39 +1,37 @@
 FROM php:8.2-cli
 
-# System deps
+# ── System dependencies ────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libxml2-dev libzip-dev \
-    libonig-dev libpq-dev libsqlite3-dev sqlite3 \
-    && docker-php-ext-install pdo pdo_pgsql pdo_sqlite \
-       mbstring zip pcntl bcmath opcache \
+    git curl zip unzip \
+    libxml2-dev libzip-dev libonig-dev \
+    libpq-dev libsqlite3-dev sqlite3 \
+    libicu-dev \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install \
+        pdo pdo_pgsql pdo_sqlite \
+        mbstring zip pcntl bcmath intl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Composer
+# ── Composer ───────────────────────────────────────────────────────────────────
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Install PHP dependencies
+# ── PHP dependencies (no scripts, no autoloader yet) ──────────────────────────
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader
 
-# Copy source
+# ── Application source ─────────────────────────────────────────────────────────
 COPY . .
 
-# Regenerate optimized autoloader now that app/ classes exist
+# ── Optimised autoloader (includes app/ classes) ─────────────────────────────
 RUN composer dump-autoload --optimize --no-interaction --no-scripts
 
-# Pre-generate bootstrap caches (uses dummy .env so artisan can bootstrap)
-RUN cp .env.example .env \
-    && php artisan package:discover --ansi || true \
-    && php artisan config:clear || true \
-    && rm -f .env
-
-# Permissions (running as root in Docker, storage must be writable)
+# ── Permissions ───────────────────────────────────────────────────────────────
 RUN mkdir -p storage/framework/{sessions,views,cache/data} storage/logs bootstrap/cache \
     && chmod -R 777 storage bootstrap/cache
 
-# Strip CRLF from entrypoint (Windows -> Linux line endings)
+# ── Entrypoint (strip Windows CRLF) ──────────────────────────────────────────
 COPY docker-entrypoint.sh /entrypoint.sh
 RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
