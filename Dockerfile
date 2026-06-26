@@ -1,16 +1,17 @@
-FROM php:8.2-cli
+FROM php:8.2-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libpng-dev libxml2-dev libzip-dev libonig-dev \
     libpq-dev libsqlite3-dev sqlite3 \
-    && docker-php-ext-install pdo pdo_pgsql pdo_sqlite mbstring zip exif pcntl bcmath gd \
+    && docker-php-ext-install pdo pdo_pgsql pdo_sqlite mbstring zip exif pcntl bcmath gd opcache \
+    && a2enmod rewrite \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app
+WORKDIR /var/www/html
 
 # Copy composer files first (cache layer)
 COPY composer.json composer.lock ./
@@ -19,20 +20,28 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 # Copy rest of application
 COPY . .
 
+# Run post-install scripts
+RUN composer run-script post-autoload-dump --no-interaction || true
+
 # Set permissions
-RUN chmod -R 775 storage bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache
+RUN mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-# Copy .env for build-time config
-COPY .env.example .env
+# Apache config — point DocumentRoot to public/
+RUN echo '<VirtualHost *:80>\n\
+    DocumentRoot /var/www/html/public\n\
+    <Directory /var/www/html/public>\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+    ErrorLog ${APACHE_LOG_DIR}/error.log\n\
+    CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-# Generate app key and cache (no DB needed at build time)
-RUN php artisan key:generate \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Startup script
+COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-EXPOSE 8000
-
-# Migrate + seed on start, then serve
-CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=$PORT
+EXPOSE 80
+CMD ["/usr/local/bin/entrypoint.sh"]

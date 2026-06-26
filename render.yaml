@@ -4,10 +4,14 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     envVars:
+      - key: APP_NAME
+        value: "ASOIINFO Platform"
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
-        value: false
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
       - key: APP_URL
         value: https://asoiinfo-platform-v1.onrender.com
       - key: DB_CONNECTION
@@ -15,7 +19,7 @@ services:
       - key: DB_HOST
         value: dpg-d8sqptvavr4c73arvuq0-a
       - key: DB_PORT
-        value: 5432
+        value: "5432"
       - key: DB_DATABASE
         value: asoiinfo_db
       - key: DB_USERNAME
@@ -28,3 +32,5 @@ services:
         value: database
       - key: LOG_CHANNEL
         value: stderr
+      - key: TRUSTED_PROXIES
+        value: "*"
