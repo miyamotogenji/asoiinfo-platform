@@ -1,319 +1,363 @@
 @extends('layouts.admin')
 @section('title', 'Dashboard')
-@section('breadcrumb', now()->locale('es')->isoFormat('dddd D [de] MMMM, YYYY'))
+@section('breadcrumb', 'Panel → Dashboard')
 
 @push('styles')
 <style>
-    .kpi-card {
-        background:rgba(10,15,28,.85);
-        border:1px solid rgba(30,42,66,.7);
-        border-left:3px solid var(--card-accent);
-        border-radius:20px;
-        padding:22px 22px 18px;
-        position:relative; overflow:hidden;
-        transition:transform .2s, box-shadow .2s;
-    }
-    .kpi-card:hover { transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.35),0 0 30px var(--card-shadow) }
-    .kpi-card::before {
-        content:''; position:absolute; inset:0; opacity:.08;
-        background:radial-gradient(ellipse at 0% 50%, var(--card-glow-color) 0%, transparent 60%);
-        border-radius:20px;
-    }
-
-    .quick-btn {
-        display:inline-flex; align-items:center; gap:9px;
-        padding:13px 22px; border-radius:12px;
-        font-size:.87rem; font-weight:700; cursor:pointer;
-        border:none; font-family:inherit; text-decoration:none;
-        transition:all .2s; white-space:nowrap; color:#fff;
-    }
-    .quick-btn:hover { transform:translateY(-2px); filter:brightness(1.12); box-shadow:0 8px 24px rgba(0,0,0,.3) }
-    .quick-btn:active { transform:translateY(0); filter:brightness(.95) }
-
-    .crm-row { transition:background .15s }
-    .crm-row:hover { background:rgba(99,102,241,.06) }
-
-    /* Gradient heading */
-    .gradient-heading {
-        background:linear-gradient(135deg,#818cf8 0%,#a855f7 40%,#c084fc 70%,#818cf8 100%);
-        -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-        background-clip:text;
-        background-size:200% auto;
-        animation:gradientShift 4s linear infinite;
-    }
-    @keyframes gradientShift { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
-
-    /* Sparkline */
-    .spark { width:80px; height:28px; opacity:.7 }
-
-    /* Section label */
-    .section-label {
-        font-size:.68rem; font-weight:700; letter-spacing:.14em;
-        text-transform:uppercase; color:#6b7280; margin-bottom:14px;
-    }
+/* Donut chart */
+.donut-ring { transform: rotate(-90deg); transform-origin: 50% 50%; }
+.kpi-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.kpi-icon svg { width:20px; height:20px; }
+.trend-up   { color:#10b981; font-size:.75rem; font-weight:600; }
+.trend-down { color:#ef4444; font-size:.75rem; font-weight:600; }
 </style>
 @endpush
 
 @section('content')
-
-@php
-use App\Models\User;
-use App\Models\LegalEntity;
-use App\Models\Contact;
-use App\Models\Plan;
-use App\Models\Branch;
-$userCount    = User::count();
-$entityCount  = LegalEntity::count();
-$contactCount = Contact::count();
-$planCount    = Plan::where('status','active')->count();
-$branchCount  = Branch::count();
-$blockedCount = Branch::where('status','blocked')->count();
-$groupCount   = $stats['groups'] ?? 0;
-$latest       = LegalEntity::with('businessGroup')->latest()->limit(7)->get();
-@endphp
-
-{{-- ══ HEADING ═══════════════════════════════════════════════════════════════ --}}
-<div class="mb-7">
-    <div class="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-            <p class="text-xs font-semibold mb-1.5" style="color:#374151;letter-spacing:.08em;text-transform:uppercase">
-                ✦ Bienvenido, {{ auth()->user()->name }}
-            </p>
-            <h1 class="text-3xl font-extrabold gradient-heading tracking-tight" style="letter-spacing:-.04em">
-                ASOIINFO — Plataforma Multiempresa
-            </h1>
-            <p class="text-sm mt-2" style="color:#4b5563">
-                M0 + M1 completados &nbsp;·&nbsp; {{ now()->locale('es')->isoFormat('D [de] MMMM YYYY') }}
-            </p>
+{{-- ─── Header ─────────────────────────────────────────────────────────────── --}}
+<div class="flex items-start justify-between mb-6">
+    <div>
+        <p class="text-xs font-600 text-indigo-500 uppercase tracking-widest mb-1" style="font-weight:600;letter-spacing:.1em">Vista Ejecutiva</p>
+        <h1 class="text-2xl font-800 text-gray-900 leading-tight" style="font-weight:800">Dashboard</h1>
+        <p class="text-sm text-gray-400 mt-0.5">Resumen general de tu negocio</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            {{ now()->locale('es')->isoFormat('01/MM/YYYY') }} — {{ now()->locale('es')->isoFormat('DD/MM/YYYY') }}
         </div>
-        <div class="flex items-center gap-2 flex-wrap">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                  style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#34d399">
-                <span class="w-1.5 h-1.5 rounded-full animate-pulse-dot inline-block" style="background:#34d399"></span>
-                M0 + M1 Live
-            </span>
-            <a href="{{ route('admin.milestone-download') }}"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-               style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);color:#818cf8"
-               onmouseover="this.style.background='rgba(99,102,241,.22)'" onmouseout="this.style.background='rgba(99,102,241,.12)'">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Plan 20 días (.xlsx)
+        <button onclick="location.reload()" class="btn-secondary btn-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Actualizar
+        </button>
+    </div>
+</div>
+
+{{-- ─── KPI Cards ──────────────────────────────────────────────────────────── --}}
+<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+
+    {{-- Grupos activos --}}
+    <div class="stat-card flex flex-col gap-2 hover:shadow-md transition-shadow cursor-pointer" onclick="window.location='{{ route('admin.grupos.index') }}'">
+        <div class="flex items-center justify-between">
+            <div class="kpi-icon" style="background:#eef2ff">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+            </div>
+            <span class="text-xs text-gray-400">Hoy</span>
+        </div>
+        <div>
+            <div class="text-2xl font-800 text-gray-900" style="font-weight:800">{{ $stats['groups'] }}</div>
+            <div class="text-xs text-gray-500 font-500" style="font-weight:500">Grupos Activos</div>
+        </div>
+    </div>
+
+    {{-- Sucursales activas --}}
+    <div class="stat-card flex flex-col gap-2 hover:shadow-md transition-shadow cursor-pointer" onclick="window.location='{{ route('admin.sucursales.index') }}'">
+        <div class="flex items-center justify-between">
+            <div class="kpi-icon" style="background:#f0fdf4">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+            </div>
+            <span class="text-xs text-gray-400">{{ $stats['branches'] }} total</span>
+        </div>
+        <div>
+            <div class="text-2xl font-800 text-gray-900" style="font-weight:800">{{ $stats['branches'] }}</div>
+            <div class="text-xs text-gray-500 font-500" style="font-weight:500">Sucursales Activas</div>
+        </div>
+    </div>
+
+    {{-- Total por cobrar --}}
+    <div class="stat-card flex flex-col gap-2 hover:shadow-md transition-shadow cursor-pointer" onclick="window.location='{{ route('admin.cxc.index') }}'">
+        <div class="flex items-center justify-between">
+            <div class="kpi-icon" style="background:#fffbeb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <span class="text-xs text-amber-500 font-600" style="font-weight:600">Pendiente</span>
+        </div>
+        <div>
+            <div class="text-xl font-800 text-gray-900" style="font-weight:800">${{ number_format($stats['total_receivable'], 0) }}</div>
+            <div class="text-xs text-gray-500 font-500" style="font-weight:500">Cuentas x Cobrar</div>
+        </div>
+    </div>
+
+    {{-- Cobrado este mes --}}
+    <div class="stat-card flex flex-col gap-2 hover:shadow-md transition-shadow cursor-pointer" onclick="window.location='{{ route('admin.payments.index') }}'">
+        <div class="flex items-center justify-between">
+            <div class="kpi-icon" style="background:#f0fdf4">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            </div>
+            <span class="trend-up">+{{ now()->locale('es')->isoFormat('MMMM') }}</span>
+        </div>
+        <div>
+            <div class="text-xl font-800 text-gray-900" style="font-weight:800">${{ number_format($stats['collected_month'], 0) }}</div>
+            <div class="text-xs text-gray-500 font-500" style="font-weight:500">Cobrado este mes</div>
+        </div>
+    </div>
+
+    {{-- Facturas a emitir --}}
+    <div class="stat-card flex flex-col gap-2 hover:shadow-md transition-shadow cursor-pointer" onclick="window.location='{{ route('admin.invoices.to-emit') }}'">
+        <div class="flex items-center justify-between">
+            <div class="kpi-icon" style="background:#eff6ff">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+            </div>
+            <span class="text-xs text-blue-500 font-600" style="font-weight:600">{{ now()->locale('es')->isoFormat('MMMM') }}</span>
+        </div>
+        <div>
+            <div class="text-2xl font-800 text-gray-900" style="font-weight:800">{{ $stats['invoices_to_emit'] }}</div>
+            <div class="text-xs text-gray-500 font-500" style="font-weight:500">Facturas a Emitir</div>
+        </div>
+    </div>
+
+    {{-- Clientes vencidos --}}
+    <div class="stat-card flex flex-col gap-2 hover:shadow-md transition-shadow cursor-pointer" onclick="window.location='{{ route('admin.cxc.index') }}?status=overdue'">
+        <div class="flex items-center justify-between">
+            <div class="kpi-icon" style="background:#fef2f2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+            </div>
+            <span class="text-xs text-red-500 font-600" style="font-weight:600">Bloqueo</span>
+        </div>
+        <div>
+            <div class="text-2xl font-800 text-gray-900" style="font-weight:800">{{ $stats['overdue_clients'] }}</div>
+            <div class="text-xs text-gray-500 font-500" style="font-weight:500">Clientes Vencidos</div>
+        </div>
+    </div>
+</div>
+
+{{-- ─── Mid section ─────────────────────────────────────────────────────────── --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+
+    {{-- Overdue clients table (2/3 width) --}}
+    <div class="lg:col-span-2 page-card">
+        <div class="page-card-header">
+            <div>
+                <h2 class="text-sm font-700 text-gray-800" style="font-weight:700">Cuentas Vencidas</h2>
+                <p class="text-xs text-gray-400 mt-0.5">Clientes que requieren atención</p>
+            </div>
+            <a href="{{ route('admin.cxc.index') }}?status=overdue" class="btn-secondary btn-xs">Ver todas</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Cliente / Sucursal</th>
+                        <th>Factura</th>
+                        <th class="text-right">Saldo</th>
+                        <th class="text-center">Días</th>
+                        <th class="text-center">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($overdueClients as $cxc)
+                    <tr>
+                        <td>
+                            <div class="font-600 text-gray-800" style="font-weight:600">{{ $cxc->businessGroup->name ?? $cxc->branch->name ?? '—' }}</div>
+                            <div class="text-xs text-gray-400">{{ $cxc->branch->name ?? '' }}</div>
+                        </td>
+                        <td class="text-gray-500 text-xs">{{ $cxc->invoice->invoice_number ?? '—' }}</td>
+                        <td class="text-right font-600" style="font-weight:600;color:{{ $cxc->status==='overdue'?'#dc2626':'#d97706' }}">${{ number_format($cxc->balance, 2) }}</td>
+                        <td class="text-center">
+                            @if($cxc->days_overdue > 0)
+                                <span class="badge badge-red">{{ $cxc->days_overdue }}d</span>
+                            @else
+                                <span class="badge badge-yellow">Al día</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            @php $st = $cxc->status; @endphp
+                            @if($st === 'overdue')  <span class="badge badge-red">Vencido</span>
+                            @elseif($st === 'partial') <span class="badge badge-yellow">Parcial</span>
+                            @elseif($st === 'pending') <span class="badge badge-blue">Pendiente</span>
+                            @else <span class="badge badge-gray">{{ $st }}</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-10">
+                            <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <p class="text-sm text-gray-400">Sin cuentas vencidas</p>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Quick actions (1/3 width) --}}
+    <div class="page-card">
+        <div class="page-card-header">
+            <h2 class="text-sm font-700 text-gray-800" style="font-weight:700">Acciones Rápidas</h2>
+        </div>
+        <div class="p-4 flex flex-col gap-2">
+            <a href="{{ route('admin.grupos.create') }}" class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-indigo-50 hover:border-indigo-200 transition-colors group">
+                <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <div>
+                    <div class="text-xs font-600 text-gray-700" style="font-weight:600">Nuevo Grupo</div>
+                    <div class="text-[10px] text-gray-400">Crear grupo empresarial</div>
+                </div>
+            </a>
+            <a href="{{ route('admin.sucursales.create') }}" class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-green-50 hover:border-green-200 transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <div>
+                    <div class="text-xs font-600 text-gray-700" style="font-weight:600">Nueva Sucursal</div>
+                    <div class="text-[10px] text-gray-400">Crear punto de atención</div>
+                </div>
+            </a>
+            <a href="{{ route('admin.invoices.to-emit') }}" class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+                </div>
+                <div>
+                    <div class="text-xs font-600 text-gray-700" style="font-weight:600">Emitir Facturas</div>
+                    <div class="text-[10px] text-gray-400">Facturación del mes</div>
+                </div>
+            </a>
+            <a href="{{ route('admin.cxc.index') }}" class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-amber-50 hover:border-amber-200 transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <div class="text-xs font-600 text-gray-700" style="font-weight:600">Ver CxC</div>
+                    <div class="text-[10px] text-gray-400">Cuentas por cobrar</div>
+                </div>
+            </a>
+            <a href="{{ route('admin.reports.financial') }}" class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-purple-50 hover:border-purple-200 transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                </div>
+                <div>
+                    <div class="text-xs font-600 text-gray-700" style="font-weight:600">Ver Reportes</div>
+                    <div class="text-[10px] text-gray-400">Financiero y atención</div>
+                </div>
             </a>
         </div>
     </div>
 </div>
 
-{{-- ══ KPI CARDS ══════════════════════════════════════════════════════════════ --}}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+{{-- ─── Bottom section ──────────────────────────────────────────────────────── --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-    {{-- Sucursales --}}
-    <div class="kpi-card" style="--card-accent:#6366f1;--card-shadow:rgba(99,102,241,.2);--card-glow-color:#6366f1">
-        <div class="flex items-start justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-                 style="background:rgba(99,102,241,.18);border:1px solid rgba(99,102,241,.35)">
-                <svg class="w-7 h-7" style="color:#818cf8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
+    {{-- Financial summary --}}
+    <div class="page-card">
+        <div class="page-card-header">
+            <div>
+                <h2 class="text-sm font-700 text-gray-800" style="font-weight:700">Resumen Financiero</h2>
+                <p class="text-xs text-gray-400">{{ now()->locale('es')->isoFormat('MMMM YYYY') }}</p>
             </div>
-            <svg class="spark" viewBox="0 0 80 28" fill="none">
-                <polyline points="0,22 14,16 28,18 42,10 56,14 70,6 80,8" stroke="#6366f1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                <polyline points="0,22 14,16 28,18 42,10 56,14 70,6 80,8 80,28 0,28" fill="url(#g1)" opacity=".3"/>
-                <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="transparent"/></linearGradient></defs>
-            </svg>
         </div>
-        <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color:#818cf8;letter-spacing:.08em">TOTAL SUCURSALES</p>
-        <p class="text-4xl font-extrabold text-white tracking-tight">{{ $branchCount }}</p>
-        <p class="text-xs mt-1.5" style="color:#6b7280">Sucursales activas</p>
-        <div class="flex items-center gap-2 mt-3 pt-3" style="border-top:1px solid rgba(30,42,66,.5)">
-            <span style="font-size:.72rem;color:#818cf8;font-weight:700">↑ 25%</span>
-            <span style="font-size:.68rem;color:#4b5563">vs. mes anterior</span>
-        </div>
-    </div>
-
-    {{-- Usuarios --}}
-    <div class="kpi-card" style="--card-accent:#10b981;--card-shadow:rgba(16,185,129,.2);--card-glow-color:#10b981">
-        <div class="flex items-start justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-                 style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35)">
-                <svg class="w-7 h-7" style="color:#34d399" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-            </div>
-            <svg class="spark" viewBox="0 0 80 28" fill="none">
-                <polyline points="0,24 16,20 32,22 48,14 64,16 80,10" stroke="#10b981" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                <polyline points="0,24 16,20 32,22 48,14 64,16 80,10 80,28 0,28" fill="url(#g2)" opacity=".3"/>
-                <defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="transparent"/></linearGradient></defs>
-            </svg>
-        </div>
-        <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color:#34d399;letter-spacing:.08em">USUARIOS</p>
-        <p class="text-4xl font-extrabold text-white tracking-tight">{{ $userCount }}</p>
-        <p class="text-xs mt-1.5" style="color:#6b7280">Usuarios activos</p>
-        <div class="flex items-center gap-2 mt-3 pt-3" style="border-top:1px solid rgba(30,42,66,.5)">
-            <span style="font-size:.72rem;color:#34d399;font-weight:700">↑ 50%</span>
-            <span style="font-size:.68rem;color:#4b5563">vs. mes anterior</span>
-        </div>
-    </div>
-
-    {{-- Grupos --}}
-    <div class="kpi-card" style="--card-accent:#f59e0b;--card-shadow:rgba(245,158,11,.2);--card-glow-color:#f59e0b">
-        <div class="flex items-start justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-                 style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35)">
-                <svg class="w-7 h-7" style="color:#fbbf24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                </svg>
-            </div>
-            <svg class="spark" viewBox="0 0 80 28" fill="none">
-                <polyline points="0,22 20,18 40,20 60,12 80,14" stroke="#f59e0b" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                <polyline points="0,22 20,18 40,20 60,12 80,14 80,28 0,28" fill="url(#g3)" opacity=".3"/>
-                <defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="transparent"/></linearGradient></defs>
-            </svg>
-        </div>
-        <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color:#fbbf24;letter-spacing:.08em">GRUPOS</p>
-        <p class="text-4xl font-extrabold text-white tracking-tight">{{ $groupCount }}</p>
-        <p class="text-xs mt-1.5" style="color:#6b7280">Grupos definidos</p>
-        <div class="flex items-center gap-2 mt-3 pt-3" style="border-top:1px solid rgba(30,42,66,.5)">
-            <span style="font-size:.72rem;color:#fbbf24;font-weight:700">→ 0%</span>
-            <span style="font-size:.68rem;color:#4b5563">vs. mes anterior</span>
-        </div>
-    </div>
-
-    {{-- Bloqueadas --}}
-    <div class="kpi-card" style="--card-accent:#ef4444;--card-shadow:rgba(239,68,68,.2);--card-glow-color:#ef4444">
-        <div class="flex items-start justify-between mb-4">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-                 style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.35)">
-                <svg class="w-7 h-7" style="color:#f87171" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                </svg>
-            </div>
-            <svg class="spark" viewBox="0 0 80 28" fill="none">
-                <polyline points="0,10 20,14 40,8 60,18 80,12" stroke="#ef4444" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                <polyline points="0,10 20,14 40,8 60,18 80,12 80,28 0,28" fill="url(#g4)" opacity=".3"/>
-                <defs><linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="transparent"/></linearGradient></defs>
-            </svg>
-        </div>
-        <p class="text-xs font-semibold uppercase tracking-wide mb-1" style="color:#f87171;letter-spacing:.08em">BLOQUEADAS</p>
-        <p class="text-4xl font-extrabold text-white tracking-tight">{{ $blockedCount }}</p>
-        <p class="text-xs mt-1.5" style="color:#6b7280">Sucursales bloqueadas</p>
-        <div class="flex items-center gap-2 mt-3 pt-3" style="border-top:1px solid rgba(30,42,66,.5)">
-            <span style="font-size:.72rem;color:#f87171;font-weight:700">↓ 50%</span>
-            <span style="font-size:.68rem;color:#4b5563">vs. mes anterior</span>
-        </div>
-    </div>
-</div>
-
-{{-- ══ QUICK ACTIONS ═══════════════════════════════════════════════════════════ --}}
-<div class="mb-7">
-    <p class="section-label">Accesos Rápidos</p>
-    <div class="flex flex-wrap gap-3">
-        <a href="{{ route('admin.grupos.create') }}" class="quick-btn"
-           style="background:#3b82f6;box-shadow:0 4px 14px rgba(59,130,246,.35)">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            Nueva Empresa
-        </a>
-        <a href="{{ route('admin.contactos.create') }}" class="quick-btn"
-           style="background:#3b82f6;box-shadow:0 4px 14px rgba(59,130,246,.35)">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            Nuevo Contacto
-        </a>
-        <a href="{{ route('admin.planes.create') }}" class="quick-btn"
-           style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.35)">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            Nueva Factura
-        </a>
-        <a href="{{ route('admin.servicios.index') }}" class="quick-btn"
-           style="background:#f59e0b;box-shadow:0 4px 14px rgba(245,158,11,.35)">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m-4-4l4 4 4-4M4 20h16"/></svg>
-            Registrar Pago
-        </a>
-        <a href="{{ route('admin.reports.financial') }}" class="quick-btn"
-           style="background:#8b5cf6;box-shadow:0 4px 14px rgba(139,92,246,.35)">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            Ver Reportes
-        </a>
-    </div>
-</div>
-
-{{-- ══ CRM TABLE ══════════════════════════════════════════════════════════════ --}}
-<div class="rounded-2xl overflow-hidden" style="background:rgba(8,13,26,.85);border:1px solid rgba(30,42,66,.7)">
-
-    {{-- Table header --}}
-    <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(30,42,66,.6)">
-        <div>
-            <h3 class="text-sm font-bold text-white tracking-tight">Últimas Empresas CRM</h3>
-            <p class="text-xs mt-0.5" style="color:#374151">Registro de personas jurídicas y grupos</p>
-        </div>
-        <a href="{{ route('admin.empresas.index') }}"
-           class="text-xs font-semibold transition-colors"
-           style="color:#6366f1"
-           onmouseover="this.style.color='#818cf8'" onmouseout="this.style.color='#6366f1'">
-            Ver todas &rsaquo;
-        </a>
-    </div>
-
-    {{-- Table --}}
-    <div class="overflow-x-auto">
-        <table class="w-full" style="border-collapse:collapse">
-            <thead>
-                <tr style="background:rgba(4,8,16,.8)">
-                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280;letter-spacing:.1em">Empresa</th>
-                    <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color:#6b7280;letter-spacing:.1em">Grupo</th>
-                    <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider hidden md:table-cell" style="color:#6b7280;letter-spacing:.1em">RUC</th>
-                    <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider hidden lg:table-cell" style="color:#6b7280;letter-spacing:.1em">Ciudad</th>
-                    <th class="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider" style="color:#6b7280;letter-spacing:.1em">Estado</th>
-                    <th class="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider" style="color:#6b7280;letter-spacing:.1em">Creado el</th>
-                </tr>
-            </thead>
-            <tbody>
+        <div class="p-5">
             @php
-            $avatarColors = [
-                ['bg'=>'rgba(59,130,246,.2)','color'=>'#60a5fa'],
-                ['bg'=>'rgba(16,185,129,.2)','color'=>'#34d399'],
-                ['bg'=>'rgba(245,158,11,.2)','color'=>'#fbbf24'],
-                ['bg'=>'rgba(239,68,68,.2)','color'=>'#f87171'],
-                ['bg'=>'rgba(139,92,246,.2)','color'=>'#a78bfa'],
-                ['bg'=>'rgba(20,184,166,.2)','color'=>'#2dd4bf'],
-                ['bg'=>'rgba(236,72,153,.2)','color'=>'#f472b6'],
-            ];
+                $total_r = $stats['total_receivable'];
+                $collected = $stats['collected_month'];
+                $pct = ($total_r + $collected) > 0 ? round($collected / ($total_r + $collected) * 100) : 0;
             @endphp
-            @forelse($latest as $idx => $e)
-            @php $ac = $avatarColors[$idx % count($avatarColors)]; @endphp
-            <tr class="crm-row" style="border-top:1px solid rgba(30,42,66,.4)">
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
-                             style="background:{{ $ac['bg'] }};color:{{ $ac['color'] }}">
-                            {{ strtoupper(substr($e->trade_name ?? $e->legal_name, 0, 1)) }}
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold" style="color:#e2e8f0">{{ $e->trade_name ?? $e->legal_name }}</p>
-                            <p class="text-xs font-mono" style="color:#374151">{{ $e->legal_name }}</p>
-                        </div>
+            <div class="flex items-center gap-6">
+                {{-- Donut --}}
+                <div class="relative flex-shrink-0">
+                    <svg width="100" height="100" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#f3f4f6" stroke-width="12"/>
+                        <circle class="donut-ring" cx="50" cy="50" r="38" fill="none" stroke="#4f46e5" stroke-width="12"
+                            stroke-dasharray="{{ $pct * 2.39 }} 239"
+                            stroke-linecap="round"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-lg font-800 text-gray-900" style="font-weight:800">{{ $pct }}%</span>
+                        <span class="text-[9px] text-gray-400">Cobrado</span>
                     </div>
-                </td>
-                <td class="px-4 py-4 text-sm" style="color:#6b7280">{{ $e->businessGroup->name ?? '—' }}</td>
-                <td class="px-4 py-4 text-xs font-mono hidden md:table-cell" style="color:#4b5563">{{ $e->ruc ?? '—' }}</td>
-                <td class="px-4 py-4 text-sm hidden lg:table-cell" style="color:#6b7280">{{ $e->city ?? 'Ecuador' }}</td>
-                <td class="px-4 py-4 text-center">
-                    @if(($e->status ?? 'active') === 'active')
-                        <span class="badge badge-active">Activa</span>
-                    @else
-                        <span class="badge badge-blocked">Inactiva</span>
-                    @endif
-                </td>
-                <td class="px-4 py-4 text-right text-xs" style="color:#374151">
-                    {{ $e->created_at->format('d/m/Y') }}
-                </td>
-            </tr>
-            @empty
-            <tr><td colspan="6" class="px-6 py-12 text-center text-sm" style="color:#374151">Sin empresas registradas aún.</td></tr>
-            @endforelse
-            </tbody>
-        </table>
+                </div>
+                {{-- Stats --}}
+                <div class="flex-1 space-y-3">
+                    <div class="flex justify-between items-center py-1 border-b border-gray-50">
+                        <span class="text-xs text-gray-500">Total por cobrar</span>
+                        <span class="text-sm font-600 text-gray-800" style="font-weight:600">${{ number_format($total_r, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-gray-50">
+                        <span class="text-xs text-gray-500">Cobrado este mes</span>
+                        <span class="text-sm font-600 text-green-600" style="font-weight:600">${{ number_format($collected, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-gray-50">
+                        <span class="text-xs text-gray-500">Clientes vencidos</span>
+                        <span class="text-sm font-600 text-red-500" style="font-weight:600">{{ $stats['overdue_clients'] }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-xs text-gray-500">Clientes bloqueados</span>
+                        <span class="text-sm font-600 text-orange-500" style="font-weight:600">{{ $stats['blocked_clients'] }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Recent activity --}}
+    <div class="page-card">
+        <div class="page-card-header">
+            <div>
+                <h2 class="text-sm font-700 text-gray-800" style="font-weight:700">Alertas y Notificaciones</h2>
+                <p class="text-xs text-gray-400">Operaciones que requieren atención</p>
+            </div>
+            <span class="badge badge-blue">{{ $stats['overdue_clients'] + $stats['blocked_clients'] }}</span>
+        </div>
+        <div class="p-4 space-y-2">
+            @if($stats['invoices_to_emit'] > 0)
+            <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <div class="text-xs font-600 text-blue-700" style="font-weight:600">{{ $stats['invoices_to_emit'] }} facturas pendientes de emitir</div>
+                    <div class="text-[11px] text-blue-400 mt-0.5">Revisar facturas del mes</div>
+                </div>
+            </div>
+            @endif
+            @if($stats['overdue_clients'] > 0)
+            <div class="flex items-start gap-3 p-3 bg-red-50 rounded-lg">
+                <div class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                </div>
+                <div>
+                    <div class="text-xs font-600 text-red-700" style="font-weight:600">{{ $stats['overdue_clients'] }} clientes con deuda vencida</div>
+                    <div class="text-[11px] text-red-400 mt-0.5">Gestionar cobros</div>
+                </div>
+            </div>
+            @endif
+            @if($stats['blocked_clients'] > 0)
+            <div class="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
+                <div class="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                </div>
+                <div>
+                    <div class="text-xs font-600 text-orange-700" style="font-weight:600">{{ $stats['blocked_clients'] }} sucursales bloqueadas</div>
+                    <div class="text-[11px] text-orange-400 mt-0.5">Revisar bloqueos activos</div>
+                </div>
+            </div>
+            @endif
+            @if($stats['total_receivable'] > 0)
+            <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-lg">
+                <div class="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 9v1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <div class="text-xs font-600 text-amber-700" style="font-weight:600">Falta integrar API de pagos</div>
+                    <div class="text-[11px] text-amber-400 mt-0.5">Configurar pasarela</div>
+                </div>
+            </div>
+            @endif
+            @if($stats['invoices_to_emit'] === 0 && $stats['overdue_clients'] === 0 && $stats['blocked_clients'] === 0)
+            <div class="text-center py-8">
+                <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <p class="text-sm text-gray-400">Todo al día</p>
+            </div>
+            @endif
+        </div>
     </div>
 </div>
 
+<p class="text-center text-xs text-gray-300 mt-6">El dashboard se recarga automáticamente cada 30 minutos · Última sincronización: {{ now()->format('d/m/Y H:i') }}</p>
 @endsection

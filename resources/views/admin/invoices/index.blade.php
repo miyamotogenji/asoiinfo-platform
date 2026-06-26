@@ -1,105 +1,112 @@
 @extends('layouts.admin')
-@section('title', 'Facturas emitidas')
-@section('breadcrumb', 'Facturación → Facturas emitidas')
+@section('title', 'Facturas Emitidas')
+@section('breadcrumb', 'Facturación → Facturas Emitidas')
 
 @section('content')
-
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-5">
     <div>
-        <h2 class="text-lg font-semibold text-white">Facturas emitidas</h2>
-        <p class="text-sm text-gray-500 mt-0.5">{{ $invoices->total() }} factura(s) en total</p>
+        <h1 class="text-xl font-800 text-gray-900" style="font-weight:800">Facturas Emitidas</h1>
+        <p class="text-sm text-gray-400 mt-0.5">Historial de todas las facturas generadas</p>
     </div>
-    <div class="flex items-center gap-2">
-        <a href="{{ route('admin.invoices.index') }}?export=excel&{{ http_build_query(request()->only('status','from','to')) }}"
-           class="flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-medium rounded-lg transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Excel
+    <div class="flex gap-2">
+        <a href="{{ route('admin.invoices.index', ['export'=>'excel'] + request()->query()) }}" class="btn-secondary btn-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Exportar Excel
         </a>
-        <a href="{{ route('admin.invoices.to-emit') }}"
-           class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-            Emitir nuevas
+        <a href="{{ route('admin.invoices.to-emit') }}" class="btn-primary btn-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+            Emitir Facturas
         </a>
     </div>
 </div>
 
 {{-- Filters --}}
-<form method="GET" class="flex flex-wrap gap-3 mb-5">
-    <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar número o cliente…"
-           class="bg-gray-900 border border-gray-700 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-sm text-gray-200 placeholder-gray-600 outline-none w-64">
-    <select name="status" class="bg-gray-900 border border-gray-700 focus:border-indigo-500 rounded-lg px-3.5 py-2 text-sm text-gray-200 outline-none">
-        <option value="">Todos los estados</option>
-        <option value="emitted"   {{ request('status')=='emitted'   ?'selected':'' }}>Emitida</option>
-        <option value="cancelled" {{ request('status')=='cancelled' ?'selected':'' }}>Anulada</option>
-    </select>
-    <button type="submit" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm rounded-lg transition-colors">Filtrar</button>
-    @if(request()->hasAny(['search','status']))
-        <a href="{{ route('admin.invoices.index') }}" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-400 text-sm rounded-lg transition-colors">Limpiar</a>
-    @endif
-</form>
-
-<div class="bg-navy-800 border border-gray-800 rounded-xl overflow-hidden">
-    <table class="w-full text-sm">
-        <thead>
-            <tr class="bg-navy-900/60 border-b border-gray-800">
-                <th class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Número</th>
-                <th class="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
-                <th class="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Período</th>
-                <th class="text-right px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Subtotal</th>
-                <th class="text-right px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">IVA</th>
-                <th class="text-right px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-                <th class="px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Emisión</th>
-                <th class="px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Vence</th>
-                <th class="px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-800/50">
-            @forelse($invoices as $inv)
-            <tr class="hover:bg-navy-700/30 transition-colors">
-                <td class="px-5 py-3.5">
-                    <code class="text-indigo-400 text-xs font-mono font-semibold">{{ $inv->number }}</code>
-                </td>
-                <td class="px-4 py-3.5">
-                    <p class="text-xs font-medium text-gray-200">{{ $inv->branch?->name ?? $inv->businessGroup?->name ?? '—' }}</p>
-                    <p class="text-xs text-gray-500">{{ $inv->businessGroup?->name ?? '' }}</p>
-                </td>
-                <td class="px-4 py-3.5 text-xs text-gray-400">{{ $inv->period_label ?? '—' }}</td>
-                <td class="px-4 py-3.5 text-right font-mono text-xs text-gray-300">${{ number_format($inv->subtotal, 2) }}</td>
-                <td class="px-4 py-3.5 text-right font-mono text-xs text-gray-400">${{ number_format($inv->iva_amount, 2) }}</td>
-                <td class="px-4 py-3.5 text-right font-mono text-sm font-bold text-white">${{ number_format($inv->total, 2) }}</td>
-                <td class="px-4 py-3.5 text-xs text-gray-400">{{ $inv->issue_date?->format('d/m/Y') }}</td>
-                <td class="px-4 py-3.5 text-xs {{ $inv->due_date?->isPast() ? 'text-red-400' : 'text-gray-400' }}">
-                    {{ $inv->due_date?->format('d/m/Y') }}
-                </td>
-                <td class="px-4 py-3.5">
-                    @if($inv->status === 'emitted')
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-900/40 text-blue-300 border border-blue-800">Emitida</span>
-                    @elseif($inv->status === 'cancelled')
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-red-900/40 text-red-300 border border-red-800">Anulada</span>
-                    @else
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-700 text-gray-400">{{ $inv->status }}</span>
-                    @endif
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="9" class="px-5 py-16 text-center text-gray-500">
-                    <svg class="w-10 h-10 mx-auto mb-3 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <p class="font-medium">Sin facturas emitidas</p>
-                    <p class="text-sm mt-1"><a href="{{ route('admin.invoices.to-emit') }}" class="text-indigo-400 hover:underline">Emitir facturas del mes</a></p>
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+<div class="page-card mb-4">
+    <form method="GET" class="flex flex-wrap gap-3 p-4">
+        <input type="text" name="search" value="{{ request('search') }}"
+               placeholder="Buscar por número, cliente…"
+               class="form-input" style="width:240px">
+        <select name="status" class="form-select" style="width:180px">
+            <option value="">Todos los estados</option>
+            <option value="emitted" {{ request('status')=='emitted'?'selected':'' }}>Emitida</option>
+            <option value="paid"    {{ request('status')=='paid'   ?'selected':'' }}>Pagada</option>
+            <option value="overdue" {{ request('status')=='overdue'?'selected':'' }}>Vencida</option>
+            <option value="cancelled"{{ request('status')=='cancelled'?'selected':'' }}>Anulada</option>
+        </select>
+        <button type="submit" class="btn-primary btn-sm">Filtrar</button>
+        @if(request()->hasAny(['search','status']))
+            <a href="{{ route('admin.invoices.index') }}" class="btn-secondary btn-sm">Limpiar</a>
+        @endif
+    </form>
 </div>
 
-@if($invoices->hasPages())
-<div class="mt-4 flex justify-end">{{ $invoices->withQueryString()->links() }}</div>
-@endif
-
+{{-- Table --}}
+<div class="page-card">
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Cliente / Grupo</th>
+                    <th>Sucursal</th>
+                    <th>Período</th>
+                    <th class="text-right">Subtotal</th>
+                    <th class="text-right">IVA</th>
+                    <th class="text-right">Total</th>
+                    <th class="text-center">Estado</th>
+                    <th>Fecha</th>
+                    <th>Vence</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($invoices as $inv)
+                <tr>
+                    <td>
+                        <a href="{{ route('admin.invoices.show', $inv) }}"
+                           class="font-600 text-indigo-600 hover:text-indigo-800 font-mono text-xs" style="font-weight:600">{{ $inv->number }}</a>
+                    </td>
+                    <td>
+                        <div class="font-600 text-sm text-gray-800" style="font-weight:600">{{ $inv->businessGroup->name ?? '—' }}</div>
+                        <div class="text-xs text-gray-400">{{ $inv->legalEntity->name ?? '' }}</div>
+                    </td>
+                    <td class="text-sm text-gray-600">{{ $inv->branch->name ?? '—' }}</td>
+                    <td class="text-sm text-gray-500">{{ $inv->period_label }}</td>
+                    <td class="text-right text-sm text-gray-600">${{ number_format($inv->subtotal, 2) }}</td>
+                    <td class="text-right text-sm text-gray-500">${{ number_format($inv->iva_amount, 2) }}</td>
+                    <td class="text-right font-700 text-sm" style="font-weight:700">${{ number_format($inv->total, 2) }}</td>
+                    <td class="text-center">
+                        @switch($inv->status)
+                            @case('emitted')   <span class="badge badge-blue">Emitida</span> @break
+                            @case('paid')      <span class="badge badge-green">Pagada</span> @break
+                            @case('overdue')   <span class="badge badge-red">Vencida</span> @break
+                            @case('cancelled') <span class="badge badge-gray">Anulada</span> @break
+                            @default           <span class="badge badge-gray">{{ $inv->status }}</span>
+                        @endswitch
+                    </td>
+                    <td class="text-xs text-gray-500">{{ $inv->issue_date?->format('d/m/Y') }}</td>
+                    <td class="text-xs {{ $inv->due_date?->isPast() && $inv->status!=='paid' ? 'text-red-500 font-600' : 'text-gray-500' }}">
+                        {{ $inv->due_date?->format('d/m/Y') }}
+                    </td>
+                    <td class="text-center">
+                        <div class="flex items-center justify-center gap-1">
+                            <a href="{{ route('admin.invoices.show', $inv) }}" class="btn-secondary btn-xs">Ver</a>
+                            <a href="{{ route('admin.invoices.show', $inv) }}?export=pdf" class="btn-secondary btn-xs">PDF</a>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="11" class="text-center py-14">
+                        <p class="text-gray-400 text-sm">No hay facturas emitidas aún.</p>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    @if($invoices->hasPages())
+    <div class="px-5 py-4 border-t border-gray-100">{{ $invoices->withQueryString()->links() }}</div>
+    @endif
+</div>
 @endsection
