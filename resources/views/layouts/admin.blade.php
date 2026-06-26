@@ -313,44 +313,32 @@
             Servicios contratados
         </a>
 
-        {{-- Phase 2 locked items ──────────────────────────────────────── --}}
-        <div class="mt-2 mb-1 px-3">
-            <span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full" style="background:#0ea5e920;color:#0ea5e9;border:1px solid #0ea5e930">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                Fase 2 — Próximamente
-            </span>
-        </div>
-
-        <a href="{{ route('admin.invoices.to-emit') }}" class="nav-link opacity-50" style="cursor:default">
+        <a href="{{ route('admin.invoices.to-emit') }}" class="nav-link {{ request()->routeIs('admin.invoices.to-emit') ? 'active':'' }}">
             <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
             Facturas a emitir
-            <span class="ml-auto text-xs px-1.5 py-0.5 rounded" style="background:#0ea5e920;color:#0ea5e9;font-size:10px">Fase 2</span>
         </a>
 
-        <a href="{{ route('admin.invoices.index') }}" class="nav-link opacity-50" style="cursor:default">
+        <a href="{{ route('admin.invoices.index') }}" class="nav-link {{ request()->routeIs('admin.invoices.index') ? 'active':'' }}">
             <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             Facturas emitidas
-            <span class="ml-auto text-xs px-1.5 py-0.5 rounded" style="background:#0ea5e920;color:#0ea5e9;font-size:10px">Fase 2</span>
         </a>
 
-        <a href="{{ route('admin.cxc.index') }}" class="nav-link opacity-50" style="cursor:default">
+        <a href="{{ route('admin.cxc.index') }}" class="nav-link {{ request()->routeIs('admin.cxc.*') ? 'active':'' }}">
             <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             Cuentas por cobrar
-            <span class="ml-auto text-xs px-1.5 py-0.5 rounded" style="background:#0ea5e920;color:#0ea5e9;font-size:10px">Fase 2</span>
         </a>
 
-        <a href="{{ route('admin.payments.index') }}" class="nav-link opacity-50" style="cursor:default">
+        <a href="{{ route('admin.payments.index') }}" class="nav-link {{ request()->routeIs('admin.payments.*') ? 'active':'' }}">
             <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
             </svg>
             Pagos recibidos
-            <span class="ml-auto text-xs px-1.5 py-0.5 rounded" style="background:#0ea5e920;color:#0ea5e9;font-size:10px">Fase 2</span>
         </a>
 
         {{-- Download milestone plan ─────────────────────────────────── --}}
@@ -377,6 +365,14 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
             Reporte atención
+        </a>
+
+        {{-- Auditoría --}}
+        <a href="{{ route('admin.audit.index') }}" class="nav-link {{ request()->routeIs('admin.audit.*') ? 'active':'' }}">
+            <svg class="nav-icon w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            Auditoría
         </a>
 
         {{-- Administración --}}

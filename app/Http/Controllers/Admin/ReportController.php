@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AccountReceivable;
-use App\Models\Payment;
-use App\Models\Conversation;
-use App\Models\Branch;
-use App\Models\ContractedService;
+use App\Models\{AccountReceivable, Payment, Conversation, Branch, ContractedService};
+use App\Exports\{FinancialReportExport, InvoicesExport};
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
 class ReportController extends Controller
@@ -46,6 +44,15 @@ class ReportController extends Controller
             ->whereIn('status', ['overdue', 'partial'])
             ->orderByDesc('days_overdue')
             ->limit(20)->get();
+
+        if (request('export') === 'excel') {
+            return (new FinancialReportExport)->download();
+        }
+        if (request('export') === 'pdf') {
+            $pdf = Pdf::loadView('admin.reports.financial-pdf', compact('data','monthlyHistory','overdueList'))
+                ->setPaper('a4','landscape');
+            return $pdf->download('reporte-financiero-'.now()->format('Ymd').'.pdf');
+        }
 
         return view('admin.reports.financial', compact('data', 'monthlyHistory', 'overdueList'));
     }

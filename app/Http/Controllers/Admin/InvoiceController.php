@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Invoice;
-use App\Models\ContractedService;
-use App\Models\AccountReceivable;
+use App\Models\{Invoice, ContractedService, AccountReceivable, AuditLog};
+use App\Exports\InvoicesExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -86,7 +86,21 @@ class InvoiceController extends Controller
                   ->orWhereHas('branch', fn($b) => $b->where('name', 'ilike', "%{$s}%")))
             ->latest()->paginate(25);
 
+        if (request('export') === 'excel') {
+            return (new InvoicesExport(request()->only('status','from','to')))->download();
+        }
+
         return view('admin.invoices.index', compact('invoices'));
+    }
+
+    public function show(Invoice $invoice)
+    {
+        $invoice->load(['businessGroup','legalEntity','branch','contractedService.plan']);
+        if (request('export') === 'pdf') {
+            $pdf = Pdf::loadView('admin.invoices.pdf', compact('invoice'))->setPaper('a4');
+            return $pdf->download('factura-'.$invoice->number.'.pdf');
+        }
+        return view('admin.invoices.show', compact('invoice'));
     }
 }
 
